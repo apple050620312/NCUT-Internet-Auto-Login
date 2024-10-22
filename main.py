@@ -6,9 +6,9 @@ import re
 from urllib.parse import quote
 
 # 設定登入資訊
-account = "s0X000000@student.ncut.edu.tw"
-password = "X000000000"
-ip_segment = "180"  # New config option for IP address segment
+account = "sXXXXXXXX@student.ncut.edu.tw" # 學號
+password = "XXXXXXXXXX" # 身分證字號
+ip_segment = "XXX"  # IP 段
 
 def check_connection(timeout=1):
     try:
