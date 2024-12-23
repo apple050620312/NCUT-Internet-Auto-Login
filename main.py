@@ -1,24 +1,38 @@
 import time
 import socket
 import requests
-# from bs4 import BeautifulSoup
 import re
 from urllib.parse import quote
+import subprocess
 
-# 設定登入資訊
-account = "sXXXXXXXX@student.ncut.edu.tw" # 學號
-password = "XXXXXXXXXX" # 身分證字號
-ip_segment = "XXX"  # IP 段
+def get_ip_segment():
+    try:
+        # Get all IP configurations using ipconfig command with 'cp950' encoding for Traditional Chinese Windows
+        output = subprocess.check_output("ipconfig", shell=True).decode('cp950')
+        
+        # Look for IPv4 addresses matching our pattern (support both English and Chinese Windows)
+        ip_pattern = r"(?:IPv4.*?Address|IPv4.*?位址)[.\s]*: 172\.16\.(\d{1,3})\.\d{1,3}"
+        match = re.search(ip_pattern, output)
+        
+        if match:
+            # Return the third octet (xxx from 172.16.xxx.yyy)
+            return match.group(1)
+        else:
+            # Default fallback if no matching IP is found
+            print("Warning: Could not detect IP segment automatically. Using default value.")
+            return "180"
+    except Exception as e:
+        print(f"Error detecting IP segment: {e}")
+        return "180"
 
 def check_connection(timeout=1):
     try:
-        # 嘗試連接 Google DNS 伺服器 (8.8.8.8), 53 為 DNS 服務的端口
         socket.create_connection(("8.8.8.8", 53), timeout=timeout)
         time.sleep(1)
-        return True  # 如果在 timeout 內連接成功，返回 True
+        return True
     except OSError:
         time.sleep(1)
-        return False  # 如果連接失敗或超時，返回 False
+        return False
 
 def extract_magic_from_url(url):
     match = re.search(r'fgtauth\?([^&]+)', url)
@@ -26,13 +40,13 @@ def extract_magic_from_url(url):
         return match.group(1)
     return None
 
-def extract_redirect_url(page_content):
+def extract_redirect_url(page_content, ip_segment):
     match = re.search(fr'window\.location="(http://172\.16\.{ip_segment}\.254:1000/fgtauth\?[^\"]+)"', page_content)
     if match:
         return match.group(1)
     return None
 
-def login():
+def login(ip_segment):
     session = requests.Session()
     
     try:
@@ -46,7 +60,7 @@ def login():
             print("8.8.8.8 Connected.\n")
         return
     
-    redirect_url = extract_redirect_url(initial_response.text)
+    redirect_url = extract_redirect_url(initial_response.text, ip_segment)
     if redirect_url:
         print("Extracted Redirect URL:", redirect_url)
         if check_connection():
@@ -65,10 +79,8 @@ def login():
             print("8.8.8.8 Connected.\n")
         return
     
-    # 使用提供的 Full Action URL
     full_action_url = f'http://172.16.{ip_segment}.254:1000/'
     
-    # 從 Extracted Redirect URL 提取 magic 參數
     magic = extract_magic_from_url(redirect_url)
     
     if not magic:
@@ -81,7 +93,6 @@ def login():
         if check_connection():
             print("8.8.8.8 Connected.\n")
 
-    # 構建 POST 請求的 URL 和資料
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Upgrade-Insecure-Requests': '1',
@@ -96,7 +107,6 @@ def login():
         'password': password
     }
     
-    # 將資料轉換為 URL 編碼格式
     encoded_login_data = '&'.join(f'{quote(k)}={quote(v)}' for k, v in login_data.items())
     
     try:
@@ -105,7 +115,6 @@ def login():
         if check_connection():
             print("8.8.8.8 Connected.\n")
     except requests.exceptions.RequestException as e:
-        pass
         print("Login POST request failed:", e)
         if check_connection():
             print("8.8.8.8 Connected.\n")
@@ -113,21 +122,29 @@ def login():
 def main():
     print("NCUT Internet Auto Login")
     print("by sangege\n")
-    if check_connection():
-            print("8.8.8.8 Connected.\n")
 
-    failed_attempts = 0  # 用來追蹤連接失敗的次數
+    # Get IP segment at startup
+    ip_segment = get_ip_segment()
+    print(f"Detected IP segment: {ip_segment}\n")
+
+    if check_connection():
+        print("8.8.8.8 Connected.\n")
+
+    failed_attempts = 0
 
     while True:
         if not check_connection():
             failed_attempts += 1
-            if failed_attempts >= 2:  # 如果連續兩次連接失敗
+            if failed_attempts >= 2:
                 print("8.8.8.8 didn't response last two attempts")
-                login()
-                failed_attempts = 0  # 重置計數器
-            time.sleep(1)  # 增加等待時間以避免頻繁重試
+                login(ip_segment)
+                failed_attempts = 0
+            time.sleep(1)
         else:
-            failed_attempts = 0  # 成功連接時重置計數器
+            failed_attempts = 0
 
 if __name__ == "__main__":
+    # 設定登入資訊
+    account = "ncut"
+    password = "a"
     main()
