@@ -20,10 +20,10 @@ def get_ip_segment():
         else:
             # Default fallback if no matching IP is found
             print("Warning: Could not detect IP segment automatically. Using default value.")
-            return "180"
+            return segment
     except Exception as e:
         print(f"Error detecting IP segment: {e}")
-        return "180"
+        return segment
 
 def check_connection(timeout=1):
     try:
@@ -147,4 +147,5 @@ if __name__ == "__main__":
     # 設定登入資訊
     account = "ncut"
     password = "a"
+    segment = "100"
     main()
