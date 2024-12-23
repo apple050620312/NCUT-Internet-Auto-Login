@@ -1,21 +1,24 @@
-# NCUT-Internet-Auto-Login
-A simple script detecting internet status and auto login when you got disconnected by NCUT server
+# 勤益網路自動登入系統
+一個簡單的 Python 腳本，透過檢測網路斷線，自動重新登入勤益網路。
 
-# Usage
-1. Install Python
-2. Download `main.py` and edit line 9 & 10 to your login credentials you used to login from the website
-3. Edit line 10 `ip_segment` to your login page's 172.16.XXX.254 (fill in only XXX)
-4. cmd `pip install requests bs4`
-5. `Win + R` & `shell:common startup` and put the script into the folder to auto run when startup
-6. Now your internet will auto reconnect when NCUT server disconnected you
+# 使用教學
+1. 安裝 [Python](https://www.python.org/downloads/)
+2. `Win + R` 輸入 `cmd` 按 `Enter`
+3. 在 cmd 中輸入 `pip install requests`
+4. 下載 `NCUT_Internet_Auto_Login.py` 這個檔案
+5. 正常使用沒有要做其他設定的話，點兩下開啟腳本即可，開機自動執行請參考下方
 
-# Contributing
-Just send a pull request and I will read
+# 開機自動執行
+1. `Win + R` 輸入 `shell:common startup` 按 `Enter`
+2. 將 `NCUT_Internet_Auto_Login.py` 放到開啟的資料夾內
+3. 點兩下確定腳本能直接開啟並且沒有報錯，重新開機測試腳本會不會自動執行
 
-# Support
-Discord: `sangege`
+# 聯絡我
+Discord: [@sangege](https://discord.com/users/523114942434639873)
 
-# Disclaimer
-The script won't do anything to user's computer and NCUT network
+# 貢獻
+歡迎廣大勤益資訊大佬發 PR 一起改進這個腳本
 
-If NCUT don't want this script exist please contact me and I will take it down
+# 聲明
+這個腳本不會記錄使用者的資訊，也不會對勤益網路造成損害，
+如果勤益校方不希望這個腳本存在，請聯絡我將這個腳本下架。
