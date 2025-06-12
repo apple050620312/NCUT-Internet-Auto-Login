@@ -3,6 +3,11 @@
 一個簡單的 Python 腳本，透過檢測網路斷線，自動重新登入勤益網路。\
 （僅測試養浩學舍有線網路可用，若於其他勤益網路環境可聯絡我詢問）
 
+## Auto install
+1. Download [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/AILIFE-4798/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat)
+2. Right click - Run as device administrator
+3. Enjoy :)
+
 ## 使用教學
 
 1. 安裝 [Python](https://www.python.org/downloads/)
