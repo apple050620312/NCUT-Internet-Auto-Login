@@ -75,6 +75,22 @@ if not exist "%PY_EXE%" (
 
 :python_installed
 
+echo Setting Python as default program for .py files...
+assoc .py=Python.File >nul 2>&1
+ftype Python.File="%PY_EXE%" "%%1" %%* >nul 2>&1
+
+:: Verify file association
+reg query "HKEY_CLASSES_ROOT\.py" | find "Python.File" >nul
+if %errorlevel% neq 0 (
+    echo Warning: Failed to set Python as default for .py files using normal means
+    echo Trying force method
+    reg add "HKCR\.py" /ve /d "Python.File" /f
+    reg add "HKCR\Python.File\shell\open\command" /ve /d "\"%PY_EXE%\" \"%%1\" %%*" /f
+    reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.py\UserChoice" /f
+    taskkill /f /im explorer.exe
+    start explorer.exe
+)
+
 :: Rest of the script remains the same...
 :: Step 3: Install requests package
 echo Installing required packages...
