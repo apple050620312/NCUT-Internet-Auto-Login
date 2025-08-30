@@ -3,113 +3,100 @@ import socket
 import requests
 import re
 from urllib.parse import quote
-import subprocess
-
-
-def get_ip_segment():
-    try:
-        # Get all IP configurations using ipconfig command with 'cp950' encoding for Traditional Chinese Windows
-        output = subprocess.check_output("ipconfig", shell=True).decode("cp950")
-
-        # Look for IPv4 addresses matching our pattern (support both English and Chinese Windows)
-        ip_pattern = (
-            r"(?:IPv4.*?Address|IPv4.*?位址)[.\s]*: 172\.16\.(\d{1,3})\.\d{1,3}"
-        )
-        match = re.search(ip_pattern, output)
-
-        if match:
-            # Return the third octet (xxx from 172.16.xxx.yyy)
-            return match.group(1)
-        else:
-            # Default fallback if no matching IP is found
-            print(
-                "Warning: Could not detect IP segment automatically. Using default value."
-            )
-            return segment
-    except Exception as e:
-        print(f"Error detecting IP segment: {e}")
-        return segment
-
 
 def check_connection(timeout=1):
+    """检查网络连接状态"""
     try:
-        socket.create_connection(("8.8.8.8", 53), timeout=timeout)
+        socket.create_connection(("1.1.1.1", 53), timeout=timeout)
         time.sleep(1)
         return True
     except OSError:
         time.sleep(1)
         return False
 
-
 def extract_magic_from_url(url):
+    """从URL中提取magic参数"""
     match = re.search(r"fgtauth\?([^&]+)", url)
-    if match:
-        return match.group(1)
-    return None
+    return match.group(1) if match else None
 
-
-def extract_redirect_url(page_content, ip_segment):
+def extract_redirect_url(page_content):
+    """从页面内容中提取重定向URL"""
     match = re.search(
-        rf'window\.location="(http://172\.16\.{ip_segment}\.254:1000/fgtauth\?[^\"]+)"',
+        r'window\.location="(http://\d+\.\d+\.\d+\.\d+:1000/fgtauth\?[^\"]+)"',
         page_content,
     )
+    return match.group(1) if match else None
+
+def extract_gateway_ip(redirect_url):
+    """从重定向URL中提取网关IP"""
+    match = re.search(r"http://(\d+\.\d+\.\d+\.\d+):1000", redirect_url)
     if match:
-        return match.group(1)
+        # 将IP的最后一部分替换为254
+        return f"{match.group(1)}"
     return None
 
+def check_captive_portal_title(page_content):
+    """检查captive portal页面标题是否匹配"""
+    title_pattern = r"勤益科技大學"
+    match = re.search(title_pattern, page_content, re.IGNORECASE)
+    return match is not None
 
-def login(ip_segment):
+def login():
+    """执行登录操作"""
     session = requests.Session()
-
+    
+    # 初始请求获取重定向
     try:
-        initial_response = session.get("http://www.gstatic.com/generate_204")
-        print("Trying to access login page...")
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
+        initial_response = session.get("http://www.gstatic.com/generate_204", timeout=5)
+        print("尝试访问登录页面...")
     except Exception as e:
-        print("Initial request failed:", e)
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
+        print(f"初始请求失败: {e}")
         return
 
-    redirect_url = extract_redirect_url(initial_response.text, ip_segment)
-    if redirect_url:
-        print("Extracted Redirect URL:", redirect_url)
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
-    else:
-        print("Failed to extract redirect URL.")
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
+    # 提取重定向URL
+    redirect_url = extract_redirect_url(initial_response.text)
+    if not redirect_url:
+        print("无法提取重定向URL。")
         return
+        
+    print(f"提取的重定向URL: {redirect_url}")
 
+    # 从重定向URL提取网关IP（始终为x.x.x.254）
+    gateway_ip = extract_gateway_ip(redirect_url)
+    if not gateway_ip:
+        print("无法从重定向URL提取网关IP")
+        return
+        
+    print(f"使用网关IP: {gateway_ip}")
+
+    # 检查是否为正确的认证页面
     try:
-        login_page = session.get(redirect_url)
+        login_page_response = session.get(redirect_url, timeout=5)
+        login_page_response.encoding = 'utf-8'  # 确保使用UTF-8编码
+        if not check_captive_portal_title(login_page_response.text):
+            print("Captive portal标题与预期模式不匹配。")
+            print("您可能未连接到正确的网络。")
+            return
+        else:
+            print("检测到正确的认证门户页面")
     except Exception as e:
-        print("Failed to fetch the login page:", e)
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
+        print(f"获取登录页面失败: {e}")
         return
 
-    full_action_url = f"http://172.16.{ip_segment}.254:1000/"
-
+    # 提取magic参数
     magic = extract_magic_from_url(redirect_url)
-
     if not magic:
-        print("Failed to extract magic parameter.")
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
+        print("无法提取magic参数。")
         return
-    else:
-        print(f"magic={magic}")
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
+        
+    print(f"magic参数: {magic}")
 
+    # 准备登录数据
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Upgrade-Insecure-Requests": "1",
         "Referer": redirect_url,
-        "Origin": f"http://172.16.{ip_segment}.254:1000",
+        "Origin": f"http://{gateway_ip}:1000",
     }
 
     login_data = {
@@ -119,51 +106,60 @@ def login(ip_segment):
         "password": password,
     }
 
+    # 编码登录数据
     encoded_login_data = "&".join(
         f"{quote(k)}={quote(v)}" for k, v in login_data.items()
     )
 
+    # 发送登录请求
     try:
         response = session.post(
-            full_action_url, data=encoded_login_data, headers=headers, timeout=30
+            f"http://{gateway_ip}:1000/",
+            data=encoded_login_data,
+            headers=headers,
+            timeout=30
         )
-        print("Auto Login Successful")
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
+        
+        # 检查登录是否成功
+        if response.status_code == 200 and "/keepalive?" in response.text.lower():
+            print("自动登录成功!")
+        else:
+            print("登录请求完成，但状态可能不成功")
+            
     except requests.exceptions.RequestException as e:
-        print("Login POST request failed:", e)
-        if check_connection():
-            print("8.8.8.8 Connected.\n")
-
+        print(f"登录POST请求失败: {e}")
 
 def main():
-    print("NCUT Internet Auto Login")
-    print("by sangege\n")
+    print("NCUT校园网自动登录V2")
+    print("by sangege & AI LIFE\n")
+    print("https://github.com/apple050620312/NCUT-Internet-Auto-Login\n")
+    
+    # 设置登录信息
+    global account, password
+    account = "ncut"  # 替换为您的账号
+    password = "ncut"    # 替换为您的密码
+    
+    # 在启动时显示账号和密码
+    print(f"使用的账号: {account}")
+    print(f"使用的密码: {password}\n")
 
-    # Get IP segment at startup
-    ip_segment = get_ip_segment()
-    print(f"Detected IP segment: {ip_segment}\n")
-
-    if check_connection():
-        print("8.8.8.8 Connected.\n")
-
-    failed_attempts = 0
+    failed_attempts = 1
 
     while True:
         if not check_connection():
             failed_attempts += 1
-            if failed_attempts >= 2:
-                print("8.8.8.8 didn't response last two attempts")
-                login(ip_segment)
-                failed_attempts = 0
-            time.sleep(1)
+            print(f"连接失败 (第{failed_attempts}次尝试)")
+            
+            if failed_attempts >= 5:
+                print("尝试登录...")
+                login()
+                failed_attempts = 1
+            time.sleep(2)
         else:
-            failed_attempts = 0
-
+            if failed_attempts > 0:
+                print("连接已恢复")
+                failed_attempts = 0
+            time.sleep(5)
 
 if __name__ == "__main__":
-    # 設定登入資訊
-    account = "ncut"
-    password = "a"
-    segment = "100"
     main()
