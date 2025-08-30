@@ -27,11 +27,12 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 
 ## Auto Install / 一鍵安裝
 
-1. Download [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
-   下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat) (right click, save link as)
-2. Right click - Run as administrator  
+1. Download [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat) (right click, save link as)
+   
+   下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
+3. Right click - Run as administrator  
    右鍵點擊 - 以系統管理員身份執行
-3. Enjoy :)  
+4. Enjoy :)  
    享受自動登入 :)
 
 ## Manual Installation / 手動安裝
