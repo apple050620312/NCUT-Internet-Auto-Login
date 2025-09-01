@@ -3,6 +3,11 @@ import socket
 import requests
 import re
 from urllib.parse import quote
+from datetime import datetime
+
+def get_timestamp():
+    """獲取當前時間戳記"""
+    return datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
 
 def check_connection(timeout=1):
     """檢查網路連線狀態"""
@@ -48,48 +53,48 @@ def login():
     # 初始請求取得重新導向
     try:
         initial_response = session.get("http://www.gstatic.com/generate_204", timeout=5)
-        print("嘗試存取登入頁面...")
+        print(f"{get_timestamp()} 嘗試存取登入頁面...")
     except Exception as e:
-        print(f"初始請求失敗: {e}")
+        print(f"{get_timestamp()} 初始請求失敗: {e}")
         return
 
     # 提取重新導向URL
     redirect_url = extract_redirect_url(initial_response.text)
     if not redirect_url:
-        print("無法提取重新導向URL。")
+        print(f"{get_timestamp()} 無法提取重新導向URL。")
         return
         
-    print(f"提取的重新導向URL: {redirect_url}")
+    print(f"{get_timestamp()} 提取的重新導向URL: {redirect_url}")
 
     # 從重新導向URL提取閘道IP（始終為x.x.x.254）
     gateway_ip = extract_gateway_ip(redirect_url)
     if not gateway_ip:
-        print("無法從重新導向URL提取閘道IP")
+        print(f"{get_timestamp()} 無法從重新導向URL提取閘道IP")
         return
         
-    print(f"使用閘道IP: {gateway_ip}")
+    print(f"{get_timestamp()} 使用閘道IP: {gateway_ip}")
 
     # 檢查是否為正確的認證頁面
     try:
         login_page_response = session.get(redirect_url, timeout=5)
         login_page_response.encoding = 'utf-8'  # 確保使用UTF-8編碼
         if not check_captive_portal_title(login_page_response.text):
-            print("Captive portal標題與預期模式不符合。")
-            print("您可能未連線到正確的網路。")
+            print(f"{get_timestamp()} Captive portal標題與預期模式不符合。")
+            print(f"{get_timestamp()} 您可能未連線到正確的網路。")
             return
         else:
-            print("偵測到正確的認證入口頁面")
+            print(f"{get_timestamp()} 偵測到正確的認證入口頁面")
     except Exception as e:
-        print(f"取得登入頁面失敗: {e}")
+        print(f"{get_timestamp()} 取得登入頁面失敗: {e}")
         return
 
     # 提取magic參數
     magic = extract_magic_from_url(redirect_url)
     if not magic:
-        print("無法提取magic參數。")
+        print(f"{get_timestamp()} 無法提取magic參數。")
         return
         
-    print(f"magic參數: {magic}")
+    print(f"{get_timestamp()} magic參數: {magic}")
 
     # 準備登入資料
     headers = {
@@ -122,14 +127,31 @@ def login():
         
         # 檢查登入是否成功
         if response.status_code == 200 and "/keepalive?" in response.text.lower():
-            print("自動登入成功!")
+            print(f"{get_timestamp()} 自動登入成功!")
         else:
-            print("登入請求完成，但狀態可能不成功")
+            print(f"{get_timestamp()} 登入請求完成，但狀態可能不成功")
             
     except requests.exceptions.RequestException as e:
-        print(f"登入POST請求失敗: {e}")
+        print(f"{get_timestamp()} 登入POST請求失敗: {e}")
 
 def main():
+    # ASCII Art Banner
+    banner = """
+   _   _  ____ _   _ _____   ___       _                       _   
+  | \\ | |/ ___| | | |_   _| |_ _|_ __ | |_ ___ _ __ _ __   ___| |_ 
+  |  \\| | |   | | | | | |    | || '_ \\| __/ _ \\ '__| '_ \\ / _ \\ __|
+  | |\\  | |___| |_| | | |    | || | | | ||  __/ |  | | | |  __/ |_ 
+  |_| \\_|\\____|\\___/  |_|_  |___|_| |_|\\__\\___|_|  |_| |_|\\___|\\__|
+   / \\  _   _| |_ ___   | |    ___   __ _(_)_ __   \\ \\   / /___ \\  
+  / _ \\| | | | __/ _ \\  | |   / _ \\ / _` | | '_ \\   \\ \\ / /  __) | 
+ / ___ \\ |_| | || (_) | | |__| (_) | (_| | | | | |   \\ V /  / __/  
+/_/   \\_\\__,_|\\__\\___/  |_____\\___/ \\__, |_|_| |_|    \\_/  |_____| 
+                                    |___/                         
+
+
+"""
+    
+    print(banner)
     print("NCUT校園網自動登入V2")
     print("by sangege & AI LIFE\n")
     print("https://github.com/apple050620312/NCUT-Internet-Auto-Login\n")
@@ -140,24 +162,24 @@ def main():
     password = "ncut"    # 替換為您的密碼
     
     # 在啟動時顯示帳號和密碼
-    print(f"使用的帳號: {account}")
-    print(f"使用的密碼: {password}\n")
+    print("使用的帳號: " + account)
+    print("使用的密碼: " + password + "\n\n\n")
 
     failed_attempts = 1
 
     while True:
         if not check_connection():
             failed_attempts += 1
-            print(f"連線失敗 (第{failed_attempts}次嘗試)")
+            print(f"{get_timestamp()} 連線失敗 (第{failed_attempts}次嘗試)")
             
             if failed_attempts >= 5:
-                print("嘗試登入...")
+                print(f"{get_timestamp()} 嘗試登入...")
                 login()
                 failed_attempts = 1
             time.sleep(2)
         else:
             if failed_attempts > 0:
-                print("連線已恢復")
+                print(f"{get_timestamp()} 連線已恢復")
                 failed_attempts = 0
             time.sleep(5)
 
