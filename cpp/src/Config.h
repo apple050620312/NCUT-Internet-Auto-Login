@@ -14,6 +14,11 @@ struct AppConfig {
     std::wstring language = L"en"; // "en", "zh-TW"
     bool dark_theme = false;
     AutostartMode autostart = AutostartMode::None;
+    bool start_minimized = false;
+    bool close_to_tray = false;
+    bool encrypt_credentials = true; // DPAPI (user for GUI, machine for service)
+    int win_x = -1, win_y = -1, win_w = 760, win_h = 520;
+    bool ask_on_close = true;
 };
 
 namespace Config {
@@ -29,6 +34,7 @@ std::wstring config_path(bool service = false);
 // Autostart helpers
 bool set_registry_run(bool enable);
 bool is_registry_run_enabled();
+bool clear_all_autostart();
 
 // Service helpers (require admin)
 constexpr const wchar_t* kServiceName = L"NCUTAutoLoginSvc";
@@ -40,4 +46,3 @@ bool stop_service();
 bool is_elevated();
 
 }
-

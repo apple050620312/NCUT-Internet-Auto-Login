@@ -4,13 +4,13 @@
 #include "I18N.h"
 
 #include <commctrl.h>
+#include <windowsx.h>
 #include <string>
 
 #define IDC_EDIT_ACCOUNT  1001
 #define IDC_EDIT_PASSWORD 1002
 #define IDC_BTN_START     1003
 #define IDC_BTN_STOP      1004
-#define IDC_BTN_SAVE      1005
 #define IDC_EDIT_LOG      1006
 #define IDC_GROUP_AUTO    1010
 #define IDC_RAD_NONE      1011
@@ -20,6 +20,8 @@
 #define IDC_COMBO_LANG    1015
 #define IDC_CHECK_DARK    1016
 #define WM_TRAYICON       (WM_APP + 2)
+#define IDC_CHECK_CLOSETRAY 1017
+#define IDC_CHECK_STARTMIN  1018
 
 using namespace std;
 
@@ -34,6 +36,7 @@ AppWindow::AppWindow() {}
 AppWindow::~AppWindow() {
     monitor_.stop();
     remove_tray_icon();
+    if (hbrDark_) DeleteObject(hbrDark_);
 }
 
 bool AppWindow::create(HINSTANCE hInstance) {
@@ -60,6 +63,10 @@ bool AppWindow::create(HINSTANCE hInstance) {
     ShowWindow(hwnd_, SW_SHOW);
     UpdateWindow(hwnd_);
     init_tray_icon();
+    if (config_.start_minimized) {
+        ShowWindow(hwnd_, SW_HIDE);
+        show_balloon(I18N::t(L"BalloonStarted"));
+    }
     return true;
 }
 
@@ -122,10 +129,7 @@ LRESULT AppWindow::handle_message(UINT msg, WPARAM wParam, LPARAM lParam) {
         hBtnStop_ = CreateWindowW(L"BUTTON", I18N::t(L"BtnStop").c_str(), WS_CHILD | WS_VISIBLE | WS_DISABLED,
             660, 10, 70, 26, hwnd_, (HMENU)IDC_BTN_STOP, nullptr, nullptr);
 
-        hBtnSave_ = CreateWindowW(L"BUTTON", I18N::t(L"BtnSave").c_str(), WS_CHILD | WS_VISIBLE,
-            580, 42, 150, 24, hwnd_, (HMENU)IDC_BTN_SAVE, nullptr, nullptr);
-
-        hStatus_ = CreateWindowW(L"STATIC", I18N::t(L"StatusStopped").c_str(), WS_CHILD | WS_VISIBLE,
+    hStatus_ = CreateWindowW(L"STATIC", I18N::t(L"StatusStopped").c_str(), WS_CHILD | WS_VISIBLE,
             16, 46, 200, 20, hwnd_, nullptr, nullptr, nullptr);
 
         // i18n + theme
@@ -140,29 +144,37 @@ LRESULT AppWindow::handle_message(UINT msg, WPARAM wParam, LPARAM lParam) {
             440, 42, 120, 24, hwnd_, (HMENU)IDC_CHECK_DARK, nullptr, nullptr);
         SendMessageW(hCheckDark_, BM_SETCHECK, config_.dark_theme ? BST_CHECKED : BST_UNCHECKED, 0);
 
+        hCheckCloseTray_ = CreateWindowW(L"BUTTON", I18N::t(L"CheckboxCloseToTray").c_str(), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+            580, 42, 160, 24, hwnd_, (HMENU)IDC_CHECK_CLOSETRAY, nullptr, nullptr);
+        SendMessageW(hCheckCloseTray_, BM_SETCHECK, config_.close_to_tray ? BST_CHECKED : BST_UNCHECKED, 0);
+
+        hCheckStartMin_ = CreateWindowW(L"BUTTON", I18N::t(L"CheckboxStartMin").c_str(), WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+            580, 68, 160, 24, hwnd_, (HMENU)IDC_CHECK_STARTMIN, nullptr, nullptr);
+        SendMessageW(hCheckStartMin_, BM_SETCHECK, config_.start_minimized ? BST_CHECKED : BST_UNCHECKED, 0);
+
         // Autostart group
         hGroupAutostart_ = CreateWindowW(L"BUTTON", I18N::t(L"GroupAutostart").c_str(), WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
-            16, 72, 560, 56, hwnd_, (HMENU)IDC_GROUP_AUTO, nullptr, nullptr);
+            16, 96, 560, 56, hwnd_, (HMENU)IDC_GROUP_AUTO, nullptr, nullptr);
         hRadioNone_ = CreateWindowW(L"BUTTON", I18N::t(L"RadioNone").c_str(), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
-            24, 92, 120, 20, hwnd_, (HMENU)IDC_RAD_NONE, nullptr, nullptr);
+            24, 116, 120, 20, hwnd_, (HMENU)IDC_RAD_NONE, nullptr, nullptr);
         hRadioReg_ = CreateWindowW(L"BUTTON", I18N::t(L"RadioRegistry").c_str(), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
-            160, 92, 150, 20, hwnd_, (HMENU)IDC_RAD_REG, nullptr, nullptr);
+            160, 116, 150, 20, hwnd_, (HMENU)IDC_RAD_REG, nullptr, nullptr);
         hRadioSvc_ = CreateWindowW(L"BUTTON", I18N::t(L"RadioService").c_str(), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
-            330, 92, 150, 20, hwnd_, (HMENU)IDC_RAD_SVC, nullptr, nullptr);
+            330, 116, 150, 20, hwnd_, (HMENU)IDC_RAD_SVC, nullptr, nullptr);
 
         if (config_.autostart == AutostartMode::Registry) SendMessageW(hRadioReg_, BM_SETCHECK, BST_CHECKED, 0);
         else if (config_.autostart == AutostartMode::Service) SendMessageW(hRadioSvc_, BM_SETCHECK, BST_CHECKED, 0);
         else SendMessageW(hRadioNone_, BM_SETCHECK, BST_CHECKED, 0);
 
         hLog_ = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_CHILD | WS_VISIBLE | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL,
-            16, 136, 716, 336, hwnd_, (HMENU)IDC_EDIT_LOG, nullptr, nullptr);
+            16, 176, 716, 296, hwnd_, (HMENU)IDC_EDIT_LOG, nullptr, nullptr);
 
         apply_theme();
         break;
     }
     case WM_SIZE: {
         int w = LOWORD(lParam); int h = HIWORD(lParam);
-        MoveWindow(hLog_, 16, 136, w - 32, h - 152, TRUE);
+        MoveWindow(hLog_, 16, 176, w - 32, h - 192, TRUE);
         break;
     }
     case WM_COMMAND: {
@@ -184,17 +196,42 @@ LRESULT AppWindow::handle_message(UINT msg, WPARAM wParam, LPARAM lParam) {
             Logger::instance().info(L"監控停止");
             toggle_controls(false);
             show_balloon(I18N::t(L"BalloonStopped"));
-        } else if (id == IDC_BTN_SAVE) {
-            save_config();
-            update_autostart();
-            I18N::set_language(config_.language);
-            apply_i18n();
-            apply_theme();
         } else if (id == 20001) { // tray Show
             ShowWindow(hwnd_, SW_RESTORE);
             SetForegroundWindow(hwnd_);
         } else if (id == 20002) { // tray Exit
             DestroyWindow(hwnd_);
+        }
+        // Auto-apply settings for controls
+        if (HIWORD(wParam) == BN_CLICKED) {
+            if ((HWND)lParam == hCheckDark_) {
+                config_.dark_theme = (SendMessageW(hCheckDark_, BM_GETCHECK, 0, 0) == BST_CHECKED);
+                Config::save(config_, false);
+                apply_theme();
+            } else if ((HWND)lParam == hRadioNone_ || (HWND)lParam == hRadioReg_ || (HWND)lParam == hRadioSvc_) {
+                if (SendMessageW(hRadioReg_, BM_GETCHECK, 0, 0) == BST_CHECKED) config_.autostart = AutostartMode::Registry;
+                else if (SendMessageW(hRadioSvc_, BM_GETCHECK, 0, 0) == BST_CHECKED) config_.autostart = AutostartMode::Service;
+                else config_.autostart = AutostartMode::None;
+                Config::save(config_, false);
+                update_autostart();
+            } else if ((HWND)lParam == hCheckCloseTray_) {
+                config_.close_to_tray = (SendMessageW(hCheckCloseTray_, BM_GETCHECK, 0, 0) == BST_CHECKED);
+                Config::save(config_, false);
+            } else if ((HWND)lParam == hCheckStartMin_) {
+                config_.start_minimized = (SendMessageW(hCheckStartMin_, BM_GETCHECK, 0, 0) == BST_CHECKED);
+                Config::save(config_, false);
+            }
+        } else if (HIWORD(wParam) == CBN_SELCHANGE && (HWND)lParam == hComboLang_) {
+            int idx = (int)SendMessageW(hComboLang_, CB_GETCURSEL, 0, 0);
+            config_.language = (idx == 1) ? L"zh-TW" : L"en";
+            Config::save(config_, false);
+            I18N::set_language(config_.language);
+            apply_i18n();
+            InvalidateRect(hwnd_, nullptr, TRUE);
+        } else if (HIWORD(wParam) == EN_CHANGE && ((HWND)lParam == hEditAccount_ || (HWND)lParam == hEditPassword_)) {
+            config_.account = get_window_text(hEditAccount_);
+            config_.password = get_window_text(hEditPassword_);
+            Config::save(config_, false);
         }
         break;
     }
@@ -208,11 +245,16 @@ LRESULT AppWindow::handle_message(UINT msg, WPARAM wParam, LPARAM lParam) {
     case WM_TRAYICON: {
         if (LOWORD(lParam) == WM_RBUTTONUP) {
             POINT pt; GetCursorPos(&pt);
-            if (!hTrayMenu_) {
-                hTrayMenu_ = CreatePopupMenu();
-                AppendMenuW(hTrayMenu_, MF_STRING, 20001, I18N::t(L"TrayShow").c_str());
-                AppendMenuW(hTrayMenu_, MF_STRING, 20002, I18N::t(L"TrayExit").c_str());
-            }
+            if (hTrayMenu_) { DestroyMenu(hTrayMenu_); hTrayMenu_ = nullptr; }
+            hTrayMenu_ = CreatePopupMenu();
+            AppendMenuW(hTrayMenu_, MF_STRING, 20001, I18N::t(L"TrayShow").c_str());
+            AppendMenuW(hTrayMenu_, MF_STRING | (dark_?MF_CHECKED:0), 20003, I18N::t(L"CheckboxDark").c_str());
+            HMENU lang = CreatePopupMenu();
+            AppendMenuW(lang, MF_STRING | (I18N::lang()==L"en"?MF_CHECKED:0), 21001, L"English");
+            AppendMenuW(lang, MF_STRING | (I18N::lang()==L"zh-TW"?MF_CHECKED:0), 21002, L"繁體中文");
+            AppendMenuW(hTrayMenu_, MF_POPUP, (UINT_PTR)lang, I18N::t(L"LabelLang").c_str());
+            AppendMenuW(hTrayMenu_, MF_SEPARATOR, 0, nullptr);
+            AppendMenuW(hTrayMenu_, MF_STRING, 20002, I18N::t(L"TrayExit").c_str());
             SetForegroundWindow(hwnd_);
             TrackPopupMenu(hTrayMenu_, TPM_BOTTOMALIGN | TPM_LEFTALIGN, pt.x, pt.y, 0, hwnd_, nullptr);
         } else if (LOWORD(lParam) == WM_LBUTTONDBLCLK) {
@@ -225,11 +267,22 @@ LRESULT AppWindow::handle_message(UINT msg, WPARAM wParam, LPARAM lParam) {
         if ((wParam & 0xfff0) == SC_MINIMIZE) {
             ShowWindow(hwnd_, SW_HIDE);
             return 0;
+        } else if ((wParam & 0xfff0) == SC_CLOSE) {
+            // Normalize close into WM_CLOSE so our prompt runs
+            PostMessageW(hwnd_, WM_CLOSE, 0, 0);
+            return 0;
         }
         break;
     }
     case WM_CLOSE: {
-        ShowWindow(hwnd_, SW_HIDE);
+        if (config_.ask_on_close) {
+            if (prompt_close_decision()) return 0;
+        }
+        if (config_.close_to_tray) {
+            ShowWindow(hwnd_, SW_HIDE);
+        } else {
+            DestroyWindow(hwnd_);
+        }
         return 0;
     }
     case WM_DESTROY: {
@@ -240,15 +293,38 @@ LRESULT AppWindow::handle_message(UINT msg, WPARAM wParam, LPARAM lParam) {
     }
     case WM_CTLCOLORDLG:
     case WM_CTLCOLORSTATIC:
-    case WM_CTLCOLOREDIT: {
+    case WM_CTLCOLOREDIT:
+    case WM_CTLCOLORBTN:
+    case WM_CTLCOLORLISTBOX: {
         if (dark_) {
             HDC hdc = (HDC)wParam;
             SetBkColor(hdc, RGB(32,32,32));
             SetTextColor(hdc, RGB(220,220,220));
-            static HBRUSH hbr = CreateSolidBrush(RGB(32,32,32));
-            return (LRESULT)hbr;
+            if (!hbrDark_) hbrDark_ = CreateSolidBrush(RGB(32,32,32));
+            return (LRESULT)hbrDark_;
         }
         break;
+    }
+    case WM_ERASEBKGND: {
+        if (dark_) {
+            RECT rc; GetClientRect(hwnd_, &rc);
+            HDC hdc = (HDC)wParam;
+            if (!hbrDark_) hbrDark_ = CreateSolidBrush(RGB(32,32,32));
+            FillRect(hdc, &rc, hbrDark_);
+            return 1;
+        }
+        break;
+    }
+    case WM_NCHITTEST: {
+        // Allow dragging by grabbing the top client area like a title bar
+        LRESULT hit = DefWindowProcW(hwnd_, msg, wParam, lParam);
+        if (hit == HTCLIENT) {
+            POINT pt{ GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+            RECT wr{}; GetWindowRect(hwnd_, &wr);
+            int y = pt.y - wr.top;
+            if (y >= 0 && y < 48) return HTCAPTION; // top 48px acts as caption
+        }
+        return hit;
     }
     default:
         return DefWindowProcW(hwnd_, msg, wParam, lParam);
@@ -278,18 +354,31 @@ void AppWindow::apply_i18n() {
     if (hLabelPassword_) SetWindowTextW(hLabelPassword_, I18N::t(L"LabelPassword").c_str());
     if (hBtnStart_) SetWindowTextW(hBtnStart_, I18N::t(L"BtnStart").c_str());
     if (hBtnStop_) SetWindowTextW(hBtnStop_, I18N::t(L"BtnStop").c_str());
-    if (hBtnSave_) SetWindowTextW(hBtnSave_, I18N::t(L"BtnSave").c_str());
     if (hGroupAutostart_) SetWindowTextW(hGroupAutostart_, I18N::t(L"GroupAutostart").c_str());
     if (hRadioNone_) SetWindowTextW(hRadioNone_, I18N::t(L"RadioNone").c_str());
     if (hRadioReg_) SetWindowTextW(hRadioReg_, I18N::t(L"RadioRegistry").c_str());
     if (hRadioSvc_) SetWindowTextW(hRadioSvc_, I18N::t(L"RadioService").c_str());
     if (hLabelLang_) SetWindowTextW(hLabelLang_, I18N::t(L"LabelLang").c_str());
     if (hCheckDark_) SetWindowTextW(hCheckDark_, I18N::t(L"CheckboxDark").c_str());
+    if (hCheckCloseTray_) SetWindowTextW(hCheckCloseTray_, I18N::t(L"CheckboxCloseToTray").c_str());
+    if (hCheckStartMin_) SetWindowTextW(hCheckStartMin_, I18N::t(L"CheckboxStartMin").c_str());
 }
 
 void AppWindow::apply_theme() {
     dark_ = (SendMessageW(hCheckDark_, BM_GETCHECK, 0, 0) == BST_CHECKED);
     InvalidateRect(hwnd_, nullptr, TRUE);
+    // Try to enable dark title bar on supported Windows
+    HMODULE hDwm = LoadLibraryW(L"dwmapi.dll");
+    if (hDwm) {
+        typedef HRESULT (WINAPI *DwmSetWindowAttribute_t)(HWND, DWORD, LPCVOID, DWORD);
+        auto p = (DwmSetWindowAttribute_t)GetProcAddress(hDwm, "DwmSetWindowAttribute");
+        if (p) {
+            BOOL useDark = dark_ ? TRUE : FALSE;
+            const DWORD DWMWA_USE_IMMERSIVE_DARK_MODE = 20; // works on Win10 1809+
+            p(hwnd_, DWMWA_USE_IMMERSIVE_DARK_MODE, &useDark, sizeof(useDark));
+        }
+        FreeLibrary(hDwm);
+    }
 }
 
 void AppWindow::update_autostart() {
@@ -308,8 +397,7 @@ void AppWindow::update_autostart() {
         if (!Config::service_exists()) Config::install_service(svcExe);
         Config::set_registry_run(false);
     } else {
-        Config::set_registry_run(false);
-        if (Config::service_exists()) Config::uninstall_service();
+        Config::clear_all_autostart();
     }
 }
 
@@ -336,4 +424,54 @@ void AppWindow::show_balloon(const wstring& text) {
     wcsncpy_s(n.szInfo, text.c_str(), _TRUNCATE);
     n.dwInfoFlags = NIIF_INFO;
     Shell_NotifyIconW(NIM_MODIFY, &n);
+}
+
+bool AppWindow::prompt_close_decision() {
+    // Prefer TaskDialogIndirect if available
+    HMODULE hComCtl = LoadLibraryW(L"comctl32.dll");
+    if (hComCtl) {
+        typedef HRESULT (WINAPI *TaskDialogIndirect_t)(const TASKDIALOGCONFIG*, int*, int*, BOOL*);
+        auto pTDI = (TaskDialogIndirect_t)GetProcAddress(hComCtl, "TaskDialogIndirect");
+        if (pTDI) {
+            TASKDIALOG_BUTTON btns[2]{};
+            btns[0].nButtonID = 100; btns[0].pszButtonText = I18N::t(L"BtnExit").c_str();
+            btns[1].nButtonID = 101; btns[1].pszButtonText = I18N::t(L"BtnHideToTray").c_str();
+            TASKDIALOGCONFIG tdc{}; tdc.cbSize = sizeof(tdc);
+            tdc.hwndParent = hwnd_;
+            tdc.pszWindowTitle = I18N::t(L"ClosePromptTitle").c_str();
+            tdc.pszMainInstruction = I18N::t(L"ClosePromptMain").c_str();
+            tdc.pszContent = I18N::t(L"ClosePromptContent").c_str();
+            tdc.dwCommonButtons = TDCBF_CANCEL_BUTTON; // add Cancel
+            tdc.pButtons = btns; tdc.cButtons = 2;
+            tdc.pszVerificationText = I18N::t(L"CheckRemember").c_str();
+            BOOL verified = FALSE; int pressed = 0;
+            if (SUCCEEDED(pTDI(&tdc, &pressed, nullptr, &verified))) {
+                if (verified) {
+                    config_.ask_on_close = false;
+                    config_.close_to_tray = (pressed == 101);
+                    Config::save(config_, false);
+                }
+                if (pressed == 101) {
+                    ShowWindow(hwnd_, SW_HIDE);
+                } else if (pressed == 100) {
+                    DestroyWindow(hwnd_);
+                } else if (pressed == IDCANCEL) {
+                    // do nothing
+                }
+                FreeLibrary(hComCtl);
+                return true;
+            }
+        }
+        FreeLibrary(hComCtl);
+    }
+    // Fallback to simple MessageBox (no 'remember' checkbox)
+    int r = MessageBoxW(hwnd_, I18N::t(L"ClosePromptContent").c_str(), I18N::t(L"ClosePromptTitle").c_str(), MB_ICONQUESTION | MB_YESNOCANCEL | MB_DEFBUTTON2);
+    if (r == IDYES) { // Treat YES as Exit
+        DestroyWindow(hwnd_);
+    } else if (r == IDNO) { // NO as Hide
+        ShowWindow(hwnd_, SW_HIDE);
+    } else {
+        return true; // cancel handled
+    }
+    return true;
 }
