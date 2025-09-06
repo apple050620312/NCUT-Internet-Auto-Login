@@ -1,13 +1,28 @@
-$ErrorActionPreference = 'Stop'
-
-$isccPaths = @(
-  "$Env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
-  "$Env:ProgramFiles\Inno Setup 6\ISCC.exe"
+param(
+  [string]$ISCC
 )
 
-$iscc = $isccPaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+$ErrorActionPreference = 'Stop'
+
+function Find-ISCC {
+  param([string]$Override)
+  if ($Override -and (Test-Path $Override)) { return (Resolve-Path $Override).Path }
+  if ($Env:ISCC -and (Test-Path $Env:ISCC)) { return (Resolve-Path $Env:ISCC).Path }
+  $fromPath = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Path
+  if ($fromPath) { return $fromPath }
+  $candidates = @(
+    "$Env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
+    "$Env:ProgramFiles\Inno Setup 6\ISCC.exe",
+    "$Env:ProgramFiles(x86)\Inno Setup 5\ISCC.exe",
+    "$Env:ProgramFiles\Inno Setup 5\ISCC.exe"
+  )
+  foreach($p in $candidates){ if(Test-Path $p){ return $p } }
+  return $null
+}
+
+$iscc = Find-ISCC -Override $ISCC
 if (-not $iscc) {
-  Write-Error "Inno Setup Compiler (ISCC.exe) not found. Please install Inno Setup 6."
+  Write-Error "Inno Setup Compiler (ISCC.exe) not found. Install Inno Setup 6 or pass -ISCC 'C:\\Path\\to\\ISCC.exe'"
 }
 
 # Ensure build exists
