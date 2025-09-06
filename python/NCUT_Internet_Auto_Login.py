@@ -160,6 +160,7 @@ def main():
     global account, password
     account = "ncut"  # 替換為您的帳號
     password = "ncut"    # 替換為您的密碼
+    #可以使用後門(ncut/a)登入，但不保證一定成功
     
     # 在啟動時顯示帳號和密碼
     print("使用的帳號: " + account)
@@ -172,7 +173,7 @@ def main():
             failed_attempts += 1
             print(f"{get_timestamp()} 連線失敗 (第{failed_attempts}次嘗試)")
             
-            if failed_attempts >= 5:
+            if failed_attempts >= 3:
                 print(f"{get_timestamp()} 嘗試登入...")
                 login()
                 failed_attempts = 1
