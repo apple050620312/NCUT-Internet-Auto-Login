@@ -5,6 +5,7 @@
 #include <shlwapi.h>
 #include <filesystem>
 #include <string>
+#include "Crypto.h"
 
 using namespace std;
 
@@ -55,13 +56,27 @@ AppConfig load(bool service) {
     auto path = config_path(service);
     if (!fs::exists(path)) return c;
     c.account = read_ini(path, L"account", L"ncut");
-    c.password = read_ini(path, L"password", L"ncut");
+    // read encrypted first
+    auto enc = read_ini(path, L"password_enc", L"");
+    if (!enc.empty() && Crypto::decrypt(enc, c.password)) {
+        // ok
+    } else {
+        c.password = read_ini(path, L"password", L"ncut");
+    }
     c.language = read_ini(path, L"language", L"en");
     c.dark_theme = read_ini(path, L"dark", L"0") == L"1";
     auto as = read_ini(path, L"autostart", L"none");
     if (as == L"registry") c.autostart = AutostartMode::Registry;
     else if (as == L"service") c.autostart = AutostartMode::Service;
     else c.autostart = AutostartMode::None;
+    c.start_minimized = read_ini(path, L"start_min", L"0") == L"1";
+    c.close_to_tray = read_ini(path, L"close_to_tray", L"0") == L"1";
+    c.encrypt_credentials = read_ini(path, L"encrypt", L"1") == L"1";
+    c.win_x = _wtoi(read_ini(path, L"win_x", L"-1").c_str());
+    c.win_y = _wtoi(read_ini(path, L"win_y", L"-1").c_str());
+    c.win_w = _wtoi(read_ini(path, L"win_w", L"760").c_str());
+    c.win_h = _wtoi(read_ini(path, L"win_h", L"520").c_str());
+    c.ask_on_close = read_ini(path, L"ask_on_close", L"1") == L"1";
     return c;
 }
 
@@ -70,7 +85,17 @@ bool save(const AppConfig& c, bool service) {
     ensure_dir_exists(dir);
     auto path = config_path(service);
     write_ini(path, L"account", c.account);
-    write_ini(path, L"password", c.password);
+    if (c.encrypt_credentials) {
+        std::wstring b64;
+        if (Crypto::encrypt(c.password, b64, service /*machine scope when service*/)) {
+            write_ini(path, L"password_enc", b64);
+            write_ini(path, L"password", L"");
+        } else {
+            write_ini(path, L"password", c.password);
+        }
+    } else {
+        write_ini(path, L"password", c.password);
+    }
     write_ini(path, L"language", c.language);
     write_ini(path, L"dark", c.dark_theme ? L"1" : L"0");
     switch (c.autostart) {
@@ -78,6 +103,14 @@ bool save(const AppConfig& c, bool service) {
         case AutostartMode::Service: write_ini(path, L"autostart", L"service"); break;
         default: write_ini(path, L"autostart", L"none"); break;
     }
+    write_ini(path, L"start_min", c.start_minimized ? L"1" : L"0");
+    write_ini(path, L"close_to_tray", c.close_to_tray ? L"1" : L"0");
+    write_ini(path, L"encrypt", c.encrypt_credentials ? L"1" : L"0");
+    write_ini(path, L"win_x", std::to_wstring(c.win_x));
+    write_ini(path, L"win_y", std::to_wstring(c.win_y));
+    write_ini(path, L"win_w", std::to_wstring(c.win_w));
+    write_ini(path, L"win_h", std::to_wstring(c.win_h));
+    write_ini(path, L"ask_on_close", c.ask_on_close ? L"1" : L"0");
     return true;
 }
 
@@ -103,6 +136,40 @@ bool is_registry_run_enabled() {
     LONG r = RegQueryValueExW(key, L"NCUTAutoLogin", nullptr, &type, nullptr, &size);
     RegCloseKey(key);
     return r == ERROR_SUCCESS && type == REG_SZ;
+}
+
+static void delete_run_value_hive(HKEY hive) {
+    HKEY key;
+    if (RegOpenKeyExW(hive, L"Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_SET_VALUE, &key) == ERROR_SUCCESS) {
+        RegDeleteValueW(key, L"NCUTAutoLogin");
+        RegCloseKey(key);
+    }
+}
+
+bool clear_all_autostart() {
+    // HKCU and HKLM Run values
+    delete_run_value_hive(HKEY_CURRENT_USER);
+    delete_run_value_hive(HKEY_LOCAL_MACHINE);
+
+    // Startup folder shortcuts (user and common)
+    auto del_link = [](REFKNOWNFOLDERID id, const wchar_t* name) {
+        PWSTR p = nullptr; if (SUCCEEDED(SHGetKnownFolderPath(id, 0, nullptr, &p))) {
+            std::wstring path = p; CoTaskMemFree(p);
+            path += L"\\"; path += name;
+            DeleteFileW(path.c_str());
+        }
+    };
+    del_link(FOLDERID_Startup, L"NCUTAutoLogin.lnk");
+    del_link(FOLDERID_Startup, L"NCUT Auto Login.lnk");
+    del_link(FOLDERID_CommonStartup, L"NCUTAutoLogin.lnk");
+    del_link(FOLDERID_CommonStartup, L"NCUT Auto Login.lnk");
+
+    // Service
+    if (service_exists()) {
+        stop_service();
+        uninstall_service();
+    }
+    return true;
 }
 
 bool is_elevated() {
@@ -178,4 +245,3 @@ bool stop_service() {
 }
 
 } // namespace Config
-

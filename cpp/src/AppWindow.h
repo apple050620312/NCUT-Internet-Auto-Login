@@ -26,7 +26,6 @@ private:
     HWND hEditPassword_ = nullptr;
     HWND hBtnStart_ = nullptr;
     HWND hBtnStop_ = nullptr;
-    HWND hBtnSave_ = nullptr;
     HWND hLog_ = nullptr;
     HWND hStatus_ = nullptr;
     HWND hLabelAccount_ = nullptr;
@@ -38,6 +37,11 @@ private:
     HWND hLabelLang_ = nullptr;
     HWND hComboLang_ = nullptr;
     HWND hCheckDark_ = nullptr;
+    HWND hCheckCloseTray_ = nullptr;
+    HWND hCheckStartMin_ = nullptr;
+    HWND hTab_ = nullptr;
+    HWND hStatusBar_ = nullptr;
+    int currentTab_ = 0; // 0: Dashboard, 1: Settings, 2: Logs
 
     Monitor monitor_;
     AppConfig config_;
@@ -46,6 +50,8 @@ private:
     NOTIFYICONDATAW nid_{};
     HMENU hTrayMenu_ = nullptr;
     bool dark_ = false;
+    HBRUSH hbrDark_ = nullptr;
+    HBRUSH hbrLight_ = nullptr;
 
     void load_config();
     void save_config();
@@ -55,4 +61,8 @@ private:
     void show_balloon(const std::wstring& text);
     void init_tray_icon();
     void remove_tray_icon();
+    void update_status_bar();
+    void setup_tabs();
+    void switch_tab(int index);
+    bool prompt_close_decision();
 };

@@ -14,6 +14,8 @@ add_executable(NCUTAutoLogin WIN32
     src/Logger.cpp
     src/Config.cpp
     src/I18N.cpp
+    src/Crypto.cpp
+    src/app.rc
 )
 
 target_include_directories(NCUTAutoLogin PRIVATE src)
@@ -31,7 +33,9 @@ target_link_libraries(NCUTAutoLogin PRIVATE
     comctl32
     shlwapi
     shell32
+    dwmapi
     advapi32
+    crypt32
 )
 
 if (MINGW)
@@ -44,6 +48,7 @@ add_executable(NCUTAutoLoginSvc
     src/Network.cpp
     src/Logger.cpp
     src/Config.cpp
+    src/Crypto.cpp
 )
 
 target_include_directories(NCUTAutoLoginSvc PRIVATE src)
@@ -51,6 +56,7 @@ target_link_libraries(NCUTAutoLoginSvc PRIVATE
     ws2_32
     winhttp
     advapi32
+    crypt32
 )
 if (MINGW)
     target_link_options(NCUTAutoLoginSvc PRIVATE -municode)
