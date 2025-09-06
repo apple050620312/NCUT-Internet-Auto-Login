@@ -8,14 +8,20 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 已在所有勤益網路環境中測試可用，包括養浩學舍有線網路、實驗室網路、學校WiFi以及多層NAT環境。  
 相容 Windows 11、Ubuntu 和 Termux (Android)。
 
+<p float="left">
+  <img width="600" height="672" alt="image" src="https://github.com/user-attachments/assets/d5f3ed4e-c975-4aae-ad2b-849f705cfee5" />
+  <img width="180" height="2312" alt="Screenshot_20250902-203715_Termux" src="https://github.com/user-attachments/assets/d0b6a299-5d3d-4cc1-9cb5-13b9c1df5b8d" />
+</p>
+
+
 ## Features / 功能特色
 
 - ✅ **Universal Compatibility** - Works in all NCUT network environments  
   **全域相容** - 在所有勤益網路環境中均可使用
 - ✅ **Multi-NAT Support** - Functions correctly even behind multiple routers  
   **多層NAT支援** - 即使在多層路由器環境下也能正常運作
-- ✅ **Cross-Platform** - Tested on Windows 10, Ubuntu, and Termux (Android)  
-  **跨平台** - 已在 Windows 10、Ubuntu 和 Termux (Android) 上測試
+- ✅ **Cross-Platform** - Tested on Windows 11, Ubuntu, and Termux (Android)  
+  **跨平台** - 已在 Windows 11、Ubuntu 和 Termux (Android) 上測試
 - ✅ **No IP Dependency** - No longer requires device IP address detection  
   **無IP依賴** - 不再需要檢測裝置IP位址
 - ✅ **Auto-Detection** - Automatically detects network status and performs login  
@@ -27,6 +33,8 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 
 ## Auto Install / 一鍵安裝
 
+### Windows
+
 1. Download [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat) (right click, save link as)<br>
    下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
 3. Right click - Run as administrator  
@@ -34,53 +42,80 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 4. Enjoy :)  
    享受自動登入 :)
 
+### Linux (Debian)
+
+1. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Linux-One-Click-Installer.sh'`
+2. `chmod +x Linux-One-Click-Installer.sh`
+3. `./Linux-One-Click-Installer.sh`
+
 ## Manual Installation / 手動安裝
 
+### Windows
 1. Install [Python](https://www.python.org/downloads/)  
+
    安裝 [Python](https://www.python.org/downloads/)
-2. `Win + R` type `cmd` press `Enter`  
+2. `Win + R` type `cmd` press `Enter` 
+
    `Win + R` 輸入 `cmd` 按 `Enter`
 3. In cmd type `pip install requests`  
+
    在 cmd 中輸入 `pip install requests`
 4. Download `NCUT_Internet_Auto_Login.py` file  
+
    下載 `NCUT_Internet_Auto_Login.py` 這個檔案
 5. Double-click to run the script  
+
    點兩下開啟腳本即可
 
-## Auto Run on Startup / 開機自動啟動
-
-### Windows
-
-1. `Win + R` type `shell:common startup` press `Enter`  
-   `Win + R` 輸入 `shell:common startup` 按 `Enter`
-2. Place `NCUT_Internet_Auto_Login.py` in the opened folder  
-   將 `NCUT_Internet_Auto_Login.py` 放到開啟的資料夾內
-3. Double-click to ensure the script can run without errors, then reboot to test  
-   點兩下確定腳本可以直接開啟並且沒有報錯，重新開機測試腳本會不會自動執行
-
-### Ubuntu/Linux
-
-1. Open terminal and type `crontab -e`  
-   打開終端機並輸入 `crontab -e`
-2. Add the following line: `@reboot python3 /path/to/NCUT_Internet_Auto_Login.py`  
-   新增以下行: `@reboot python3 /path/to/NCUT_Internet_Auto_Login.py`
-3. Save and exit  
-   儲存並退出
+### Linux (Debian)
+1. `apt-get install python3`
+2. `pip3 install requests`
+3. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'`
+4. `python3 NCUT_Internet_Auto_Login.py`
 
 ### Termux (Android)
 
-1. Install Termux from F-Droid or Google Play  
-   從 F-Droid 或 Google Play 安裝 Termux
+1. Install Termux from [F-Droid](https://f-droid.org/en/packages/com.termux/) or Google Play  
+
+   從 [F-Droid](https://f-droid.org/en/packages/com.termux/) 或 Google Play 安裝 Termux
 2. Open Termux and type:  
    打開 Termux 並輸入:
    ```bash
    pkg update
    pkg install python
    pip install requests
+   wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'
+   python NCUT_Internet_Auto_Login.py
    ```
+   
+## Auto Run on Startup / 開機自動啟動
 
-3. Download the script and run with `python NCUT_Internet_Auto_Login.py`
-   下載腳本並使用 `python NCUT_Internet_Auto_Login.py` 執行
+### Windows
+
+1. `Win + R` type `shell:common startup` press `Enter`  
+
+   `Win + R` 輸入 `shell:common startup` 按 `Enter`
+   
+2. Place `NCUT_Internet_Auto_Login.py` in the opened folder  
+
+   將 `NCUT_Internet_Auto_Login.py` 放到開啟的資料夾內
+3. Double-click to ensure the script can run without errors, then reboot to test  
+
+   點兩下確定腳本可以直接開啟並且沒有報錯，重新開機測試腳本會不會自動執行
+
+### Ubuntu/Linux
+
+1. Open terminal and type `crontab -e`  
+
+   打開終端機並輸入 `crontab -e`
+3. Add the following line: `@reboot python3 /path/to/NCUT_Internet_Auto_Login.py`  
+
+   新增以下行: `@reboot python3 /path/to/NCUT_Internet_Auto_Login.py`
+5. Save and exit  
+
+   儲存並退出
+
+
 
 ## Version 2.0 Changes / 版本 2.0 變更
 
@@ -88,8 +123,8 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
   **增強相容性** - 現在可在所有勤益網路環境中使用，包括實驗室和WiFi
 * **Multi-NAT Support** - Functions correctly even behind multiple routers (common in dorm environments)
   **多層NAT支援** - 即使在多層路由器環境下也能正常運作（常見於宿舍環境）
-* **Cross-Platform** - Tested on Windows 10, Ubuntu, and Termux (Android)
-  **跨平台** - 已在 Windows 10、Ubuntu 和 Termux (Android) 上測試
+* **Cross-Platform** - Tested on Windows 11, Ubuntu, and Termux (Android)
+  **跨平台** - 已在 Windows 11、Ubuntu 和 Termux (Android) 上測試
 * **No IP Dependency** - No longer requires device IP address detection
   **無IP依賴** - 不再需要檢測裝置IP位址
 * **Improved Detection** - Extracts gateway from redirect URL instead of local IP
@@ -114,9 +149,9 @@ This script does not record user information
 
 ## Testing Environments / 測試環境
 
-* ✅ Windows 10 (21H2)
+* ✅ Windows 10 (24H2)
 * ✅ Ubuntu 20.04 LTS
-* ✅ Termux 0.118.0 (Android 10+)
+* ✅ Termux 0.118.0 
 * ✅ 養浩學舍有線網路
 * ✅ 實驗室網路環境
 * ✅ 學校WiFi (TANetRoaming)
