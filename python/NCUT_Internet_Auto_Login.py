@@ -160,6 +160,7 @@ def main():
     global account, password
     account = "ncut"  # 替換為您的帳號
     password = "ncut"    # 替換為您的密碼
+    # 可以使用後門帳號 `ncut/a` 登入，但不保證一定成功
     
     # 在啟動時顯示帳號和密碼
     print("使用的帳號: " + account)
