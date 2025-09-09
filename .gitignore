@@ -1,10 +1,11 @@
-# Build artifacts
+# === Build Artifacts ===
 build/
 **/build/
 **/out/
 **/cmake-build-*/
+**/dist/
 
-# CMake
+# === CMake ===
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
@@ -13,24 +14,22 @@ compile_commands.json
 Testing/
 _deps/
 
-# Visual Studio
+# === Visual Studio/IDE ===
 .vs/
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
 *.sln
+*.vcxproj*
 ipch/
 *.opensdf
 *.sdf
 *.suo
 *.user
-*.pdb
-*.obj
-*.ilk
-*.idb
 *.tlog/
 
-# MinGW/Clang
+# === Compiled Binaries ===
+*.obj
+*.pdb
+*.ilk
+*.idb
 *.a
 *.lib
 *.dll
@@ -38,20 +37,31 @@ ipch/
 *.exp
 *.manifest
 
-# Logs
-*.log
-logs/
-
-# Python/Other (repo root had Python)
+# === Python ===
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
+src/python/.venv/
+src/python/.env/
 
-# Installer outputs
-installer/dist/
+# === Installer/Packaging ===
+installer/windows/dist/
+installer/linux/dist/
+installer/python/dist/
 
-# OS
+# === Logs ===
+*.log
+logs/
+
+# === OS/Editor Files ===
 .DS_Store
 Thumbs.db
+*.swp
+*.bak
+~$*
+
+# === Misc ===
+*.tmp
+*.old
