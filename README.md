@@ -76,8 +76,9 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 ### Termux (Android)
 
 1. Install Termux from [F-Droid](https://f-droid.org/en/packages/com.termux/) or Google Play  
-
    從 [F-Droid](https://f-droid.org/en/packages/com.termux/) 或 Google Play 安裝 Termux
+   (I don't really like Termux but, it is really lightweight though, but if Termux failed, use UserLAnd instead)
+   （我其實不太喜歡 Termux，但它真的很輕量。如果 Termux 失敗，可以改用 UserLAnd。）
 2. Open Termux and type:  
    打開 Termux 並輸入:
    ```bash
