@@ -18,7 +18,7 @@ set PY_DIR_PROGRAMFILES=%ProgramFiles%\Python313
 set PY_DIR_APPDATA=%LOCALAPPDATA%\Programs\Python\Python313
 set PY_EXE_PROGRAMFILES=%PY_DIR_PROGRAMFILES%\python.exe
 set PY_EXE_APPDATA=%PY_DIR_APPDATA%\python.exe
-set SCRIPT_URL=https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/src/python/NCUT_Internet_Auto_Login.py
+set SCRIPT_URL=https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py
 set STARTUP_DIR="%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py"
 
 :: Get temp folder path
