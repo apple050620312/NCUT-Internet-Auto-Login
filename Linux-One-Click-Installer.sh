@@ -3,7 +3,7 @@
 # Configuration
 PY_VER="3.13"
 PY_DIR="/usr/local/python313"
-SCRIPT_URL="https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/src/python/NCUT_Internet_Auto_Login.py"
+SCRIPT_URL="https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py"
 STARTUP_DIR="/etc/profile.d/NCUT_Internet_Auto_Login.py"
 
 # Check for root privileges
