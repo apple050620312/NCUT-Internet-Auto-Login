@@ -35,8 +35,8 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 
 ### Windows
 
-1. Download [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat) (right click, save link as)<br>
-   下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
+1. Download [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/installer/Windows-One-Click-Installer.bat) (right click, save link as)<br>
+   下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/installer/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
 3. Right click - Run as administrator  
    右鍵點擊 - 以系統管理員身份執行
 4. Enjoy :)  
@@ -44,7 +44,7 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 
 ### Linux (Debian)
 
-1. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Linux-One-Click-Installer.sh'`
+1. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/installer/Linux-One-Click-Installer.sh'`
 2. `chmod +x Linux-One-Click-Installer.sh`
 3. `./Linux-One-Click-Installer.sh`
 
@@ -70,7 +70,7 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 ### Linux (Debian)
 1. `apt-get install python3`
 2. `pip3 install requests`
-3. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'`
+3. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/src/python/NCUT_Internet_Auto_Login.py'`
 4. `python3 NCUT_Internet_Auto_Login.py`
 
 ### Termux (Android)
@@ -85,7 +85,7 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
    pkg update
    pkg install python
    pip install requests
-   wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'
+   wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/src/python/NCUT_Internet_Auto_Login.py'
    python NCUT_Internet_Auto_Login.py
    ```
    
