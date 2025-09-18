@@ -1,12 +1,14 @@
 # NCUT Internet Auto Login / 勤益校園網自動登入系統
 
+## 感謝 AI Life 製作 [Android 版本](https://gitlab.com/ailife8881/ncut-internet-auto-login-android)
+
 A simple Python script that detects network disconnections and automatically re-login to NCUT network.  
 Tested to work in all NCUT network environments including dorm ethernet, lab networks, school WiFi, and multi-NAT conditions.  
-Compatible with Windows 11, Ubuntu, and Termux (Android).
+Compatible with Windows 11, Ubuntu, and Android.
 
 一個簡單的 Python 腳本，透過檢測網路斷線，自動重新登入勤益網路。  
 已在所有勤益網路環境中測試可用，包括養浩學舍有線網路、實驗室網路、學校WiFi以及多層NAT環境。  
-相容 Windows 11、Ubuntu 和 Termux (Android)。
+相容 Windows 11、Ubuntu 和 Android。
 
 <p float="left">
   <img width="600" height="672" alt="image" src="https://github.com/user-attachments/assets/d5f3ed4e-c975-4aae-ad2b-849f705cfee5" />
@@ -20,10 +22,10 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
   **全域相容** - 在所有勤益網路環境中均可使用
 - ✅ **Multi-NAT Support** - Functions correctly even behind multiple routers  
   **多層NAT支援** - 即使在多層路由器環境下也能正常運作
-- ✅ **Cross-Platform** - Tested on Windows 11, Ubuntu, and Termux (Android)  
-  **跨平台** - 已在 Windows 11、Ubuntu 和 Termux (Android) 上測試
+- ✅ **Cross-Platform** - Tested on Windows 11, Ubuntu, and Android
+  **跨平台** - 已在 Windows 11、Ubuntu 和 Android 上測試
 - ✅ **No IP Dependency** - No longer requires device IP address detection  
-  **無IP依賴** - 不再需要檢測裝置IP位址
+  **無IP依賴** - 不再需要檢測裝置 IP 位址
 - ✅ **Auto-Detection** - Automatically detects network status and performs login  
   **自動檢測** - 自動檢測網路狀態並執行登入
 - ✅ **Secure** - No collection or transmission of user credentials  
@@ -35,8 +37,8 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 
 ### Windows
 
-1. Download [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/installer/Windows-One-Click-Installer.bat) (right click, save link as)<br>
-   下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/installer/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
+1. Download [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat) (right click, save link as)<br>
+   下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
 3. Right click - Run as administrator  
    右鍵點擊 - 以系統管理員身份執行
 4. Enjoy :)  
@@ -44,9 +46,15 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 
 ### Linux (Debian)
 
-1. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/installer/Linux-One-Click-Installer.sh'`
+1. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Linux-One-Click-Installer.sh'`
 2. `chmod +x Linux-One-Click-Installer.sh`
 3. `./Linux-One-Click-Installer.sh`
+
+### Android 
+
+1. 於 [ailife8881/ncut-internet-auto-login-android](https://gitlab.com/ailife8881/ncut-internet-auto-login-android/-/releases) 下載 APK
+2. 安裝並給予所需的權限
+3. 啟動自動登入的服務並連線至 Wi-Fi
 
 ## Manual Installation / 手動安裝
 
@@ -70,7 +78,7 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
 ### Linux (Debian)
 1. `apt-get install python3`
 2. `pip3 install requests`
-3. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/src/python/NCUT_Internet_Auto_Login.py'`
+3. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'`
 4. `python3 NCUT_Internet_Auto_Login.py`
 
 ### Termux (Android)
@@ -85,7 +93,7 @@ Compatible with Windows 11, Ubuntu, and Termux (Android).
    pkg update
    pkg install python
    pip install requests
-   wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/src/python/NCUT_Internet_Auto_Login.py'
+   wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'
    python NCUT_Internet_Auto_Login.py
    ```
    
