@@ -1,6 +1,6 @@
 # NCUT Internet Auto Login / 勤益校園網自動登入系統
 
-## 感謝 AI Life 製作 [Android 版本](https://gitlab.com/ailife8881/ncut-internet-auto-login-android)
+## 感謝 [AI LIFE](https://github.com/AILIFE-4798) 製作 [Android 版本](https://gitlab.com/ailife8881/ncut-internet-auto-login-android)，[localhost](https://github.com/ben001109) 製作 C++ Win32 版本
 
 A simple Python script that detects network disconnections and automatically re-login to NCUT network.  
 Tested to work in all NCUT network environments including dorm ethernet, lab networks, school WiFi, and multi-NAT conditions.  
