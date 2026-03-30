@@ -6,6 +6,7 @@ NET SESSION >nul 2>&1
 if %errorlevel% neq 0 (
     echo #######################################################
     echo # PLEASE RUN THIS SCRIPT AS ADMINISTRATOR!            #
+    echo # Right-click -> Run as Administrator                 #
     echo #######################################################
     timeout /t 5
     exit /b 1
@@ -19,7 +20,10 @@ set PY_DIR_APPDATA=%LOCALAPPDATA%\Programs\Python\Python313
 set PY_EXE_PROGRAMFILES=%PY_DIR_PROGRAMFILES%\python.exe
 set PY_EXE_APPDATA=%PY_DIR_APPDATA%\python.exe
 set SCRIPT_URL=https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py
-set STARTUP_DIR="%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py"
+
+:: [CHANGED] New installation directory (Clean & Hidden from Startup folder)
+set INSTALL_DIR=%ProgramData%\NCUT_AutoLogin
+set SCRIPT_PATH=%INSTALL_DIR%\NCUT_Internet_Auto_Login.py
 
 :: Get temp folder path
 set TEMP_INSTALLER=%TEMP%\python_installer.exe
@@ -79,45 +83,49 @@ echo Setting Python as default program for .py files...
 assoc .py=Python.File >nul 2>&1
 ftype Python.File="%PY_EXE%" "%%1" %%* >nul 2>&1
 
-:: Verify file association
-reg query "HKEY_CLASSES_ROOT\.py" | find "Python.File" >nul
-if %errorlevel% neq 0 (
-    echo Warning: Failed to set Python as default for .py files using normal means
-    echo Trying force method
-    reg add "HKCR\.py" /ve /d "Python.File" /f
-    reg add "HKCR\Python.File\shell\open\command" /ve /d "\"%PY_EXE%\" \"%%1\" %%*" /f
-    reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\.py\UserChoice" /f
-    taskkill /f /im explorer.exe
-    start explorer.exe
-)
-
-:: Rest of the script remains the same...
 :: Step 3: Install requests package
 echo Installing required packages...
 "%PY_EXE%" -m pip install requests --quiet
 
-:: Step 4: Download auto-login script
+:: Step 4: Create Directory and Download auto-login script
+echo Creating installation directory...
+if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+
 echo Downloading NCUT login script...
-curl -o %STARTUP_DIR% %SCRIPT_URL% || (
+curl -o "%SCRIPT_PATH%" %SCRIPT_URL% || (
     echo Failed to download login script
     timeout /t 5
     exit /b 1
 )
 
-:: Step 5: Run the script
-echo Starting login service...
-start "" "%PY_EXE%" %STARTUP_DIR%
+:: [CLEANUP] Remove old script from Startup folder if exists (to prevent double run)
+if exist "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py" (
+    echo Removing old script from Startup folder to prevent double execution...
+    del "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py"
+)
 
-:: Create scheduled task
-schtasks /create /tn "NCUT Auto Login" /tr "\"%PY_EXE%\" \"%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py\"" /sc onlogon /ru SYSTEM /rl HIGHEST /f >nul 2>&1
+:: Step 5: Create Scheduled Task (Unattended Mode)
+echo Creating system startup task...
+
+:: /sc onstart = Runs when Windows boots (before login)
+:: /ru SYSTEM = Runs with System privileges
+:: /tn "NCUT Auto Login" = Task Name
+schtasks /create /tn "NCUT Auto Login" /tr "\"%PY_EXE%\" \"%SCRIPT_PATH%\"" /sc onstart /ru SYSTEM /rl HIGHEST /f >nul 2>&1
+
+:: Step 6: Start the script immediately (so you don't have to reboot now)
+echo Starting login service immediately...
+start "" "%PY_EXE%" "%SCRIPT_PATH%"
 
 echo #######################################################
 echo # INSTALLATION COMPLETED SUCCESSFULLY!                #
-echo # Python location: %PY_EXE%                           #
 echo #                                                     #
-echo # The login service will run:                         #
-echo #   - Immediately now                                 #
-echo #   - On every system startup                         #
+echo # Python Script Location:                             #
+echo # %SCRIPT_PATH%
+echo #                                                     #
+echo # Status:                                             #
+echo # - Unattended Mode: ACTIVE (/sc onstart)             #
+echo # - Runs automatically at BOOT (No login needed)      #
+echo # - Runs with SYSTEM privileges                       #
 echo #######################################################
 
 timeout /t 5
