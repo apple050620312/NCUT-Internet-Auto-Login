@@ -83,11 +83,7 @@ echo Setting Python as default program for .py files...
 assoc .py=Python.File >nul 2>&1
 ftype Python.File="%PY_EXE%" "%%1" %%* >nul 2>&1
 
-:: Step 3: Install requests package
-echo Installing required packages...
-"%PY_EXE%" -m pip install requests --quiet
-
-:: Step 4: Create Directory and Download auto-login script
+:: Step 3: Create Directory and Download auto-login script
 echo Creating installation directory...
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 
@@ -104,7 +100,7 @@ if exist "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Inter
     del "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py"
 )
 
-:: Step 5: Create Scheduled Task (Unattended Mode)
+:: Step 4: Create Scheduled Task (Unattended Mode)
 echo Creating system startup task...
 
 :: /sc onstart = Runs when Windows boots (before login)
@@ -112,7 +108,7 @@ echo Creating system startup task...
 :: /tn "NCUT Auto Login" = Task Name
 schtasks /create /tn "NCUT Auto Login" /tr "\"%PY_EXE%\" \"%SCRIPT_PATH%\"" /sc onstart /ru SYSTEM /rl HIGHEST /f >nul 2>&1
 
-:: Step 6: Start the script immediately (so you don't have to reboot now)
+:: Step 5: Start the script immediately (so you don't have to reboot now)
 echo Starting login service immediately...
 start "" "%PY_EXE%" "%SCRIPT_PATH%"
 

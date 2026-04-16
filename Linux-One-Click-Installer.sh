@@ -48,11 +48,7 @@ if ! command -v python3.13 &>/dev/null; then
     exit 1
 fi
 
-# Step 2: Install requests package
-echo "Installing required packages..."
-python3.13 -m pip install requests --quiet
-
-# Step 3: Download auto-login script
+# Step 2: Download auto-login script
 echo "Downloading NCUT login script..."
 wget -O $STARTUP_DIR $SCRIPT_URL || {
     echo "Failed to download login script"
@@ -62,7 +58,7 @@ wget -O $STARTUP_DIR $SCRIPT_URL || {
 # Make script executable
 chmod +x $STARTUP_DIR
 
-# Step 4: Run the script
+# Step 3: Run the script
 echo "Starting login service..."
 python3.13 $STARTUP_DIR &
 

@@ -70,8 +70,7 @@ echo #                                                     #
 echo #  - Auto-login task cancelled                        #
 echo #  - Script files removed                             #
 echo #                                                     #
-echo #  NOTE: Python and 'requests' package remain         #
-echo #  installed on your system.                          #
+echo #  NOTE: Python remains installed on your system.     #
 echo #  (To avoid affecting other Python applications)     #
 echo #######################################################
 
