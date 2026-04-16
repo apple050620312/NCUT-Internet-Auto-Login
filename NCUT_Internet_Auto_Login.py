@@ -7,6 +7,14 @@ from http.cookiejar import CookieJar
 from urllib.parse import quote
 from datetime import datetime
 
+# ==============================================================================
+# 【帳號密碼設定區】 - 請在這裡修改您的帳號和密碼！
+# ==============================================================================
+# 備註：如使用一鍵安裝腳本，請賦予編輯器 administrator 權限，才能直接修改此處並儲存。
+account = "請替換為您的帳號（s+您的學號皆小寫）並儲存"
+password = "請替換為您的密碼（身分證字號字母大寫）並儲存"
+# ==============================================================================
+
 def get_timestamp():
     """獲取當前時間戳記"""
     return datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
@@ -189,12 +197,6 @@ def main():
     print("by sangege\n")
     print("Credit: hongfu553, AILIFE-4798, rileychh")
     print("https://github.com/apple050620312/NCUT-Internet-Auto-Login\n")
-    
-    # 更改帳號密碼區域（請在此修改您的帳號和密碼）
-    # 如使用一鍵安裝腳本，請賦予編輯器administrator權限，才能直接修改此區域的內容並儲存
-    global account, password
-    account = "請替換為您的帳號並儲存（s+您的學號皆小寫）"
-    password = "請替換為您的密碼並儲存（身分證字號字母大寫）"
     
     # 防呆機制：檢查是否忘記修改帳號密碼
     if "請替換" in account or "請替換" in password or account == "" or password == "":
