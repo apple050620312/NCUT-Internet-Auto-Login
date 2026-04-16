@@ -183,10 +183,12 @@ def main():
                                     |___/                         
 """
     print(banner)
-    print("NCUT校園網自動登入V2")
+    print("NCUT校園網自動登入V2.5") # 大版本更新，我認為需要修改版本號
     print("by sangege & AI LIFE\n")
     print("https://github.com/apple050620312/NCUT-Internet-Auto-Login\n")
     
+    # 更改帳號密碼區域（請在此修改您的帳號和密碼）
+    # 如使用一鍵安裝腳本，請賦予編輯器administrator權限，才能直接修改此區域的內容並儲存
     global account, password
     account = "請替換為您的帳號並儲存（s+您的學號皆小寫）"
     password = "請替換為您的密碼並儲存（身分證字號字母大寫）"
