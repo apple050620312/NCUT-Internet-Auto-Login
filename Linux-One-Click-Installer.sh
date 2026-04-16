@@ -58,7 +58,20 @@ wget -O $STARTUP_DIR $SCRIPT_URL || {
 # Make script executable
 chmod +x $STARTUP_DIR
 
-# Step 3: Run the script
+# Step 3: Configure Credentials (Interactive)
+echo "=============================================="
+echo "   NCUT Auto Login Setup (Linux)"
+echo "=============================================="
+read -p "請輸入您的帳號 (s+您的學號皆小寫): " NCUT_ACCOUNT
+read -s -p "請輸入您的密碼 (身分證字號字母大寫): " NCUT_PASSWORD
+echo ""
+echo "=============================================="
+
+# Use sed to replace the placeholder strings so the background task won't hang waiting for input
+sed -i 's/account = "請替換為您的帳號並儲存（s+您的學號皆小寫）"/account = "'"$NCUT_ACCOUNT"'"/g' $STARTUP_DIR
+sed -i 's/password = "請替換為您的密碼並儲存（身分證字號字母大寫）"/password = "'"$NCUT_PASSWORD"'"/g' $STARTUP_DIR
+
+# Step 4: Run the script
 echo "Starting login service..."
 python3.13 $STARTUP_DIR &
 
