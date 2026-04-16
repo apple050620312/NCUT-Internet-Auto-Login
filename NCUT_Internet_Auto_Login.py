@@ -201,6 +201,38 @@ def main():
     # 首次執行初始化與自我覆寫設定
     global account, password
     if "請替換" in account or "請替換" in password or account == "" or password == "":
+        import os
+        import sys
+        
+        script_path = os.path.abspath(__file__)
+        
+        # 測試是否具有寫入權限 (若無權限則嘗試在 Windows 提權)
+        try:
+            with open(script_path, 'a', encoding='utf-8'): 
+                pass
+        except PermissionError:
+            print("\n==============================================")
+            if os.name == 'nt':
+                print("【權限不足】偵測到腳本位於保護目錄 (如系統 Startup 資料夾)")
+                print("需要管理員權限來儲存您的設定。請在稍後的彈出視窗點擊「是」。")
+                print("==============================================")
+                time.sleep(2)
+                import ctypes
+                try:
+                    # 使用 runas 重新以管理員權限啟動這支 Python 腳本
+                    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, f'"{script_path}"', None, 1)
+                except Exception as e:
+                    print(f"\n[錯誤] 提權失敗: {e}")
+                    time.sleep(5)
+                # 結束當前未提權的程序
+                sys.exit(0)
+            else:
+                print("【權限不足】無法修改腳本本身以儲存設定。")
+                print(f"請給予檔案寫入權限 (例如: chmod +w {script_path})")
+                print("==============================================")
+                time.sleep(5)
+                sys.exit(1)
+
         print("\n==============================================")
         print("【首次設定】偵測到首次執行，請輸入後腳本將自動保存設定。")
         print("==============================================")
@@ -210,11 +242,9 @@ def main():
         if not new_account or not new_password:
             print("[錯誤] 帳號或密碼不能為空，程式即將退出...")
             time.sleep(5)
-            return
+            sys.exit(1)
             
         try:
-            import os
-            script_path = os.path.abspath(__file__)
             with open(script_path, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
                 
