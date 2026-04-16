@@ -208,7 +208,8 @@ def main():
     print("使用的密碼: " + "*" * len(password) + " (為了安全，已隱藏保護)\n\n")
 
     failed_attempts = 0
-
+    was_offline = False
+    
     while True:
         # 第一層：實體斷線防護 (避免沒插線時瘋狂報錯)
         if not is_system_network_connected():
