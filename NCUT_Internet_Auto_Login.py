@@ -72,9 +72,9 @@ def extract_redirect_url(page_content):
     return match.group(1) if match else None
 
 def extract_gateway_ip(redirect_url):
-    """從重新導向URL中提取閘道IP"""
-    # 支援動態擷取 HTTP/HTTPS 協議下的 IP 位址
-    match = re.search(r"https?://(\d+\.\d+\.\d+\.\d+)", redirect_url)
+    """從重新導向URL中提取閘道 IP 或主機名稱"""
+    # 支援動態擷取 HTTP/HTTPS 協議下的 IP 位址或網域 (非 / 及 : 字元)
+    match = re.search(r"https?://([^/:]+)", redirect_url)
     if match:
         return match.group(1)
     return None
@@ -95,12 +95,18 @@ def login():
         req = urllib.request.Request("http://www.gstatic.com/generate_204")
         with opener.open(req, timeout=5) as response:
             initial_text = response.read().decode('utf-8', errors='ignore')
+            initial_url = response.geturl()
     except Exception as e:
         print(f"{get_timestamp()} [登入異常] 初始請求失敗無法取得重新導向: {e}")
         return
 
-    # 提取重新導向URL
+    # 提取重新導向URL (優先從網頁內容抓取 JS 跳轉)
     redirect_url = extract_redirect_url(initial_text)
+    
+    # [額外容錯] 若 Fortinet 直接給了 302 HTTP 跳轉，擷取最終目標網址
+    if not redirect_url and "fgtauth" in initial_url:
+        redirect_url = initial_url
+        
     if not redirect_url:
         print(f"{get_timestamp()} [登入異常] 無法從頁面解析重新導向網址(Redirect URL)。")
         return
