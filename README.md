@@ -70,18 +70,20 @@ Compatible with Windows 11, Ubuntu, and Android.
 1. Install [Python](https://www.python.org/downloads/)  
 
    安裝 [Python](https://www.python.org/downloads/)
+   
 2. Press `Win + R` type `cmd` press `Enter` 
-
    按 `Win + R` 輸入 `cmd` 按 `Enter`
-3. In cmd type `pip install requests`  
 
+3. In cmd type `pip install requests`  
    在 cmd 中輸入 `pip install requests`
+
 4. Download `NCUT_Internet_Auto_Login.py` file  
    下載 `NCUT_Internet_Auto_Login.py` 這個檔案
+
 5. Modify the network account details in the `NCUT_Internet_Auto_Login.py` file.  
    編輯`NCUT_Internet_Auto_Login.py`內的網路帳號密碼
-6. Double-click to run the script  
 
+6. Double-click to run the script  
    點兩下開啟腳本即可
 
 ### Linux (Debian)
