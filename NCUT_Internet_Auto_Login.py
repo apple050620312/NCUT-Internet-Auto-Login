@@ -183,8 +183,9 @@ def main():
                                     |___/                         
 """
     print(banner)
-    print("NCUT校園網自動登入V3") # 大版本更新，我認為需要修改版本號
-    print("by sangege & AI LIFE\n")
+    print("NCUT 校園網自動登入 V3") # 大版本更新，我認為需要修改版本號
+    print("by sangege\n")
+    print("Credit: hongfu553, AILIFE-4798, rileychh")
     print("https://github.com/apple050620312/NCUT-Internet-Auto-Login\n")
     
     # 更改帳號密碼區域（請在此修改您的帳號和密碼）
