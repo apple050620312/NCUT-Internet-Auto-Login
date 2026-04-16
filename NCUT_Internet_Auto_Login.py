@@ -11,8 +11,8 @@ from datetime import datetime
 # 【帳號密碼設定區】 - 請在這裡修改您的帳號和密碼！
 # ==============================================================================
 # 備註：如使用一鍵安裝腳本，請賦予編輯器 administrator 權限，才能直接修改此處並儲存。
-account = "請替換為您的帳號（s+您的學號皆小寫）並儲存"
-password = "請替換為您的密碼（身分證字號字母大寫）並儲存"
+account = "請替換為您的帳號並儲存（s+您的學號皆小寫）"
+password = "請替換為您的密碼並儲存（身分證字號字母大寫）"
 # ==============================================================================
 
 def get_timestamp():
@@ -198,15 +198,52 @@ def main():
     print("Credit: hongfu553, AILIFE-4798, rileychh")
     print("https://github.com/apple050620312/NCUT-Internet-Auto-Login\n")
     
-    # 防呆機制：檢查是否忘記修改帳號密碼
+    # 首次執行初始化與自我覆寫設定
+    global account, password
     if "請替換" in account or "請替換" in password or account == "" or password == "":
         print("\n==============================================")
-        print("[錯誤] 您尚未設定帳號密碼！")
-        print("請使用記事本打開這支程式，將 account 與 password 變數替換成您的資料。")
-        print("程式即將退出...")
-        print("==============================================\n")
-        time.sleep(5)
-        return
+        print("【首次設定】偵測到首次執行，請輸入後腳本將自動保存設定。")
+        print("==============================================")
+        new_account = input("請輸入您的帳號（s+您的學號皆小寫）: ").strip()
+        new_password = input("請輸入您的密碼（身分證字號字母大寫）: ").strip()
+
+        if not new_account or not new_password:
+            print("[錯誤] 帳號或密碼不能為空，程式即將退出...")
+            time.sleep(5)
+            return
+            
+        try:
+            import os
+            script_path = os.path.abspath(__file__)
+            with open(script_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                
+            lines_to_remove = []
+            for i in range(len(lines)):
+                # 1. 使用 re.sub 替換設定好的帳號和密碼
+                if 'account = "請替換' in lines[i]:
+                    lines[i] = re.sub(r'account\s*=\s*".*"', f'account = "{new_account}"', lines[i])
+                elif 'password = "請替換' in lines[i]:
+                    lines[i] = re.sub(r'password\s*=\s*".*"', f'password = "{new_password}"', lines[i])
+                
+                # 幫忙記錄要刪除的無用提示備註
+                elif "請在這裡修改您的帳號和密碼" in lines[i] or "備註：如使用一鍵安裝腳本" in lines[i]:
+                    lines_to_remove.append(lines[i])
+                    
+            # 2. 使用 list.remove 刪除不需要的文字行
+            for target in lines_to_remove:
+                if target in lines:
+                    lines.remove(target)
+                    
+            with open(script_path, 'w', encoding='utf-8') as f:
+                f.writelines(lines)
+                
+            print("\n[成功] 帳號密碼已保存至腳本！完成自我覆寫。")
+            account = new_account
+            password = new_password
+        except Exception as e:
+            print(f"\n[錯誤] 無法覆寫腳本，請確認檔案權限 ({e})")
+            return
     
     # 在啟動時顯示帳號和密碼 (密碼進行星號隱藏保護)
     print("使用的帳號: " + account)

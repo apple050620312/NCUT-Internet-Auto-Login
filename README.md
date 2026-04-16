@@ -41,15 +41,11 @@ Compatible with Windows 11, Ubuntu, and Android.
    下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
 3. Right click - Run as administrator  
    右鍵點擊 - 以系統管理員身份執行
-4. Press `Win + R` type `%ProgramData%` press `Enter`  
-   按 `Win + R` 輸入 `%ProgramData%` 按 `Enter`  
-5. Select the `NCUT_AutoLogin` folder  
-   點選`NCUT_AutoLogin`資料夾
-6. Modify the network account details in the `NCUT_Internet_Auto_Login.py` file  
-   編輯`NCUT_Internet_Auto_Login.py`內的網路帳號密碼
-7. Save `Ctrl + s`  
-   儲存 `Ctrl + s`
-7. Enjoy :)  
+4. A console window will pop up automatically. Follow the prompt to enter your NCUT username and password.  
+   一個終端機視窗會自動彈出。請依提示輸入您的勤益網路帳號與密碼。
+5. The script will save your credentials and perform auto login.  
+   腳本會自動儲存您的設定，並開始自動登入。
+6. Enjoy :)  
    享受自動登入 :)
 
 ### Linux (Debian)
@@ -74,23 +70,19 @@ Compatible with Windows 11, Ubuntu, and Android.
 2. Press `Win + R` type `cmd` press `Enter` 
    按 `Win + R` 輸入 `cmd` 按 `Enter`
 
-3. In cmd type `pip install requests`  
-   在 cmd 中輸入 `pip install requests`
-
-4. Download `NCUT_Internet_Auto_Login.py` file  
+3. Download `NCUT_Internet_Auto_Login.py` file  
    下載 `NCUT_Internet_Auto_Login.py` 這個檔案
 
-5. Modify the network account details in the `NCUT_Internet_Auto_Login.py` file.  
-   編輯`NCUT_Internet_Auto_Login.py`內的網路帳號密碼
+4. Double-click to run the script  
+   點兩下開啟腳本
 
-6. Double-click to run the script  
-   點兩下開啟腳本即可
+5. Follow the prompt in the console to enter your network account details.  
+   依據終端機視窗的提示輸入網路帳號與密碼。
 
 ### Linux (Debian)
 1. `apt-get install python3`
-2. `pip3 install requests`
-3. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'`
-4. `python3 NCUT_Internet_Auto_Login.py`
+2. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'`
+3. `python3 NCUT_Internet_Auto_Login.py`
 
 ### Termux (Android)
 
@@ -103,7 +95,6 @@ Compatible with Windows 11, Ubuntu, and Android.
    ```bash
    pkg update
    pkg install python
-   pip install requests
    wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/NCUT_Internet_Auto_Login.py'
    python NCUT_Internet_Auto_Login.py
    ```
@@ -136,6 +127,13 @@ Compatible with Windows 11, Ubuntu, and Android.
    儲存並退出
 
 
+
+## Version 3.0 Changes / 版本 3.0 變更
+
+* **Removed Dependency** - No longer requires the external requests library, simplifying installation
+  **移除依賴** - 不再需要外部 requests 函式庫，簡化安裝流程
+* **Interactive Setup** - Automatically prompts for credentials on first run and saves them to the script
+  **互動設定** - 首次執行時會自動提示輸入帳號密碼並儲存至腳本中
 
 ## Version 2.0 Changes / 版本 2.0 變更
 
