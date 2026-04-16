@@ -41,7 +41,15 @@ Compatible with Windows 11, Ubuntu, and Android.
    下載 [Windows-One-Click-Installer.bat](https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Windows-One-Click-Installer.bat)（右鍵，另存連結為）
 3. Right click - Run as administrator  
    右鍵點擊 - 以系統管理員身份執行
-4. Enjoy :)  
+4. Press `Win + R` type `%ProgramData%` press `Enter`  
+   按 `Win + R` 輸入 `%ProgramData%` 按 `Enter`  
+5. Select the `NCUT_AutoLogin` folder  
+   點選`NCUT_AutoLogin`資料夾
+6. Modify the network account details in the `NCUT_Internet_Auto_Login.py` file  
+   編輯`NCUT_Internet_Auto_Login.py`內的網路帳號密碼
+7. Save `Ctrl + s`  
+   儲存 `Ctrl + s`
+7. Enjoy :)  
    享受自動登入 :)
 
 ### Linux (Debian)
@@ -62,17 +70,20 @@ Compatible with Windows 11, Ubuntu, and Android.
 1. Install [Python](https://www.python.org/downloads/)  
 
    安裝 [Python](https://www.python.org/downloads/)
-2. `Win + R` type `cmd` press `Enter` 
+   
+2. Press `Win + R` type `cmd` press `Enter` 
+   按 `Win + R` 輸入 `cmd` 按 `Enter`
 
-   `Win + R` 輸入 `cmd` 按 `Enter`
 3. In cmd type `pip install requests`  
-
    在 cmd 中輸入 `pip install requests`
+
 4. Download `NCUT_Internet_Auto_Login.py` file  
-
    下載 `NCUT_Internet_Auto_Login.py` 這個檔案
-5. Double-click to run the script  
 
+5. Modify the network account details in the `NCUT_Internet_Auto_Login.py` file.  
+   編輯`NCUT_Internet_Auto_Login.py`內的網路帳號密碼
+
+6. Double-click to run the script  
    點兩下開啟腳本即可
 
 ### Linux (Debian)
