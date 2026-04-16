@@ -87,20 +87,19 @@ def login():
         req = urllib.request.Request("http://www.gstatic.com/generate_204")
         with opener.open(req, timeout=5) as response:
             initial_text = response.read().decode('utf-8', errors='ignore')
-        print(f"{get_timestamp()} 嘗試存取登入頁面...")
     except Exception as e:
-        print(f"{get_timestamp()} 初始請求失敗: {e}")
+        print(f"{get_timestamp()} [登入異常] 初始請求失敗無法取得重新導向: {e}")
         return
 
     # 提取重新導向URL
     redirect_url = extract_redirect_url(initial_text)
     if not redirect_url:
-        print(f"{get_timestamp()} 無法提取重新導向URL。")
+        print(f"{get_timestamp()} [登入異常] 無法從頁面解析重新導向網址(Redirect URL)。")
         return
         
     gateway_ip = extract_gateway_ip(redirect_url)
     if not gateway_ip:
-        print(f"{get_timestamp()} 無法從重新導向URL提取閘道IP")
+        print(f"{get_timestamp()} [登入異常] 無法從重新導向網址解析閘道IP(Gateway IP)。")
         return
         
     try:
@@ -108,18 +107,16 @@ def login():
         with opener.open(req, timeout=5) as response:
             login_page_text = response.read().decode('utf-8', errors='ignore')
         if not check_captive_portal_title(login_page_text):
-            print(f"{get_timestamp()} 警告：您可能未連線到正確的校園網路。")
+            print(f"{get_timestamp()} [警告] 網頁標題不符，可能未連線到勤益校園網路。")
             return
-        else:
-            print(f"{get_timestamp()} 偵測到正確的認證入口頁面")
     except Exception as e:
-        print(f"{get_timestamp()} 取得登入頁面失敗: {e}")
+        print(f"{get_timestamp()} [登入異常] 取得登入頁面失敗: {e}")
         return
 
     # 提取magic參數
     magic = extract_magic_from_url(redirect_url)
     if not magic:
-        print(f"{get_timestamp()} 無法提取magic參數。")
+        print(f"{get_timestamp()} [登入異常] 無法提取認證 magic 參數。")
         return
 
     headers = {
@@ -153,20 +150,20 @@ def login():
         
         # 檢查登入是否成功
         if status_code == 200 and "/keepalive?" in response_text.lower():
-            print(f"{get_timestamp()} 自動登入成功!")
+            print(f"{get_timestamp()} [登入成功] 已成功完成校園網路認證！")
         else:
-            print(f"{get_timestamp()} 登入請求完成，但狀態可能不成功")
+            print(f"{get_timestamp()} [登入異常] 登入請求完成，但未偵測到成功標記。")
             
     except urllib.error.URLError as e:
         # 如果是 HTTP 錯誤（非 200），但我們仍需要分析內容
         if hasattr(e, 'read'):
             response_text = e.read().decode('utf-8', errors='ignore')
             if "/keepalive?" in response_text.lower():
-                print(f"{get_timestamp()} 自動登入成功!")
+                print(f"{get_timestamp()} [登入成功] 已成功完成校園網路認證！(帶有 HTTP 異常狀態)")
             else:
-                print(f"{get_timestamp()} 登入POST請求失敗(HTTP異常): {e}")
+                print(f"{get_timestamp()} [登入失敗] POST 請求異常且無成功標記: {e}")
         else:
-            print(f"{get_timestamp()} 登入POST請求失敗: {e}")
+            print(f"{get_timestamp()} [登入失敗] POST 請求異常: {e}")
 
 def main():
     # ASCII Art Banner
@@ -213,35 +210,39 @@ def main():
     print("使用的帳號: " + account)
     print("使用的密碼: " + "*" * len(password) + " (為了安全，已隱藏保護)\n\n")
 
-    failed_attempts = 0
-    was_offline = False
+    last_state = 'INITIAL'
     
     while True:
         # 第一層：實體斷線防護 (避免沒插線時瘋狂報錯)
         if not is_system_network_connected():
-            if not was_offline:
-                print(f"{get_timestamp()} 系統未連接網路 (請檢查 Wi-Fi 或網路線)...")
-                was_offline = True
+            if last_state != 'SYSTEM_OFFLINE':
+                print(f"{get_timestamp()} [用戶問題] 設備未連接網路，請檢查 Wi-Fi 或網路線是否已接上。")
+                last_state = 'SYSTEM_OFFLINE'
             time.sleep(3)
             continue
             
-        was_offline = False
         status = check_login_status()
         
         if status == 'ONLINE':
-            if failed_attempts > 0:
-                print(f"{get_timestamp()} 網路連線正常且已登入!")
-                failed_attempts = 0
+            if last_state != 'ONLINE':
+                if last_state == 'INITIAL':
+                    print(f"{get_timestamp()} [狀態] 網路連線正常且已登入！")
+                else:
+                    print(f"{get_timestamp()} [網路恢復] 網路連線已恢復正常且已登入！")
+                last_state = 'ONLINE'
             time.sleep(5)
             
         elif status == 'NEEDS_LOGIN':
-            print(f"{get_timestamp()} 偵測到未登入狀態，立即執行登入...")
+            if last_state != 'NEEDS_LOGIN':
+                print(f"{get_timestamp()} [狀態變更] 偵測到未登入狀態或授權過期，準備執行自動登入程序...")
+                last_state = 'NEEDS_LOGIN'
             login()
             time.sleep(2)
             
         elif status == 'UNSTABLE':
-            failed_attempts += 1
-            print(f"{get_timestamp()} 實體有連線，但無法存取外網或不穩定 (第{failed_attempts}次重試)")
+            if last_state != 'UNSTABLE':
+                print(f"{get_timestamp()} [學校網路問題] 已連接到網路，但無法存取外網且無認證頁面。這通常代表學校網路異常或是設備故障。")
+                last_state = 'UNSTABLE'
             time.sleep(3)
 
 if __name__ == "__main__":
