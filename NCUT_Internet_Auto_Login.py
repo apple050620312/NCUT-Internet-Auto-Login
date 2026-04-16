@@ -11,15 +11,44 @@ def get_timestamp():
     """獲取當前時間戳記"""
     return datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
 
-def check_connection(timeout=2):
-    """檢查網路是否暢通 (精準檢測 Captive Portal)"""
+# 第一層實體網路偵測 (UDP查表法)
+def is_system_network_connected():
+    """瞬間檢查系統實體網路狀態，0毫秒延遲"""
     try:
-        req = urllib.request.Request("http://www.gstatic.com/generate_204")
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            # 204 代表沒有被重新導向，真正連到外網
-            return response.getcode() == 204
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0] != "127.0.0.1"
     except Exception:
         return False
+
+# 第二層登入狀態偵測 (改寫為 urllib 版本)
+
+def check_login_status(max_retries=3):
+    """
+    檢查網路與登入狀態，區分「未登入」與「真斷線」
+    回傳值: 'ONLINE', 'NEEDS_LOGIN', 'UNSTABLE'
+    """
+    timeout_count = 0
+    for attempt in range(max_retries):
+        try:
+            req = urllib.request.Request("http://www.gstatic.com/generate_204")
+            with urllib.request.urlopen(req, timeout=3) as response:
+                if response.getcode() == 204:
+                    return 'ONLINE'
+                
+                # 讀取網頁內容，檢查是否包含 Fortinet 攔截特徵
+                html = response.read().decode('utf-8', errors='ignore')
+                if "fgtauth" in html or "勤益科技大學" in html or "fgtauth" in response.geturl():
+                    return 'NEEDS_LOGIN'
+                timeout_count += 1
+                
+        except Exception:
+            timeout_count += 1
+            
+        if timeout_count < max_retries:
+            time.sleep(1.5)
+            
+    return 'UNSTABLE'
 
 def extract_magic_from_url(url):
     """從URL中提取magic參數"""
@@ -43,7 +72,6 @@ def extract_gateway_ip(redirect_url):
     return None
 
 def check_captive_portal_title(page_content):
-    """檢查captive portal頁面標題是否符合"""
     title_pattern = r"勤益科技大學"
     match = re.search(title_pattern, page_content, re.IGNORECASE)
     return match is not None
@@ -70,24 +98,17 @@ def login():
         print(f"{get_timestamp()} 無法提取重新導向URL。")
         return
         
-    print(f"{get_timestamp()} 提取的重新導向URL: {redirect_url}")
-
-    # 從重新導向URL提取閘道IP（始終為x.x.x.254）
     gateway_ip = extract_gateway_ip(redirect_url)
     if not gateway_ip:
         print(f"{get_timestamp()} 無法從重新導向URL提取閘道IP")
         return
         
-    print(f"{get_timestamp()} 使用閘道IP: {gateway_ip}")
-
-    # 檢查是否為正確的認證頁面
     try:
         req = urllib.request.Request(redirect_url)
         with opener.open(req, timeout=5) as response:
             login_page_text = response.read().decode('utf-8', errors='ignore')
         if not check_captive_portal_title(login_page_text):
-            print(f"{get_timestamp()} Captive portal標題與預期模式不符合。")
-            print(f"{get_timestamp()} 您可能未連線到正確的網路。")
+            print(f"{get_timestamp()} 警告：您可能未連線到正確的校園網路。")
             return
         else:
             print(f"{get_timestamp()} 偵測到正確的認證入口頁面")
@@ -100,10 +121,7 @@ def login():
     if not magic:
         print(f"{get_timestamp()} 無法提取magic參數。")
         return
-        
-    print(f"{get_timestamp()} magic參數: {magic}")
 
-    # 準備登入資料
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Upgrade-Insecure-Requests": "1",
@@ -118,10 +136,7 @@ def login():
         "password": password,
     }
 
-    # 編碼登入資料
-    encoded_login_data = "&".join(
-        f"{quote(k)}={quote(v)}" for k, v in login_data.items()
-    )
+    encoded_login_data = "&".join(f"{quote(k)}={quote(v)}" for k, v in login_data.items())
     data_bytes = encoded_login_data.encode('utf-8')
 
     # 發送登入請求
@@ -166,16 +181,14 @@ def main():
  / ___ \\ |_| | || (_) | | |__| (_) | (_| | | | | |   \\ V /  / __/  
 /_/   \\_\\__,_|\\__\\___/  |_____\\___/ \\__, |_|_| |_|    \\_/  |_____| 
                                     |___/                         
-
-
 """
-    
     print(banner)
-    print("NCUT校園網自動登入V2")
+    print("NCUT校園網自動登入V2.5") # 大版本更新，我認為需要修改版本號
     print("by sangege & AI LIFE\n")
     print("https://github.com/apple050620312/NCUT-Internet-Auto-Login\n")
     
-    # 設定登入資訊
+    # 更改帳號密碼區域（請在此修改您的帳號和密碼）
+    # 如使用一鍵安裝腳本，請賦予編輯器administrator權限，才能直接修改此區域的內容並儲存
     global account, password
     account = "請替換為您的帳號並儲存（s+您的學號皆小寫）"
     password = "請替換為您的密碼並儲存（身分證字號字母大寫）"
@@ -184,8 +197,7 @@ def main():
     if "請替換" in account or "請替換" in password or account == "" or password == "":
         print("\n==============================================")
         print("[錯誤] 您尚未設定帳號密碼！")
-        print("請使用記事本或編輯器打開這支程式，")
-        print("將 account 與 password 變數替換成您的學號與密碼。")
+        print("請使用記事本打開這支程式，將 account 與 password 變數替換成您的資料。")
         print("程式即將退出...")
         print("==============================================\n")
         time.sleep(5)
@@ -193,28 +205,38 @@ def main():
     
     # 在啟動時顯示帳號和密碼 (密碼進行星號隱藏保護)
     print("使用的帳號: " + account)
-    print("使用的密碼: " + "*" * len(password) + " (為了安全，已隱藏保護)\n\n\n")
+    print("使用的密碼: " + "*" * len(password) + " (為了安全，已隱藏保護)\n\n")
 
     failed_attempts = 0
-
+    was_offline = False
+    
     while True:
-        if not check_connection(timeout=2):
-            failed_attempts += 1
-            print(f"{get_timestamp()} 偵測到斷線或未認證 (目前連續 {failed_attempts} 次)")
+        # 第一層：實體斷線防護 (避免沒插線時瘋狂報錯)
+        if not is_system_network_connected():
+            if not was_offline:
+                print(f"{get_timestamp()} 系統未連接網路 (請檢查 Wi-Fi 或網路線)...")
+                was_offline = True
+            time.sleep(3)
+            continue
             
-            # 連續偵測失敗 2 次就立刻重連 (比原本 5 次更快)
-            if failed_attempts >= 2:
-                print(f"{get_timestamp()} 迅速嘗試重新登入...")
-                login()
-                failed_attempts = 0
-                time.sleep(2) # 登入後給一點緩衝時間
-            else:
-                time.sleep(1) # 第一次失敗後，等 1 秒馬上再測
-        else:
+        was_offline = False
+        status = check_login_status()
+        
+        if status == 'ONLINE':
             if failed_attempts > 0:
-                print(f"{get_timestamp()} 網路已確認暢通！")
+                print(f"{get_timestamp()} 網路連線正常且已登入!")
                 failed_attempts = 0
-            time.sleep(2) # 正常狀態下，縮短每 2 秒檢查一次
+            time.sleep(5)
+            
+        elif status == 'NEEDS_LOGIN':
+            print(f"{get_timestamp()} 偵測到未登入狀態，立即執行登入...")
+            login()
+            time.sleep(2)
+            
+        elif status == 'UNSTABLE':
+            failed_attempts += 1
+            print(f"{get_timestamp()} 實體有連線，但無法存取外網或不穩定 (第{failed_attempts}次重試)")
+            time.sleep(3)
 
 if __name__ == "__main__":
     main()
