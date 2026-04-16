@@ -183,7 +183,7 @@ def main():
                                     |___/                         
 """
     print(banner)
-    print("NCUT校園網自動登入V2.5") # 大版本更新，我認為需要修改版本號
+    print("NCUT校園網自動登入V3") # 大版本更新，我認為需要修改版本號
     print("by sangege & AI LIFE\n")
     print("https://github.com/apple050620312/NCUT-Internet-Auto-Login\n")
     
