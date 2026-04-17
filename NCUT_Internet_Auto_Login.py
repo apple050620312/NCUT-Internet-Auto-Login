@@ -275,6 +275,7 @@ def main():
                 f.writelines(lines)
                 
             print("\n[成功] 帳號密碼已保存至腳本！完成自我覆寫。")
+            print("使用一件安裝腳本可以直接關閉視窗(會在背景自動運行)\n")
             account = new_account
             password = new_password
         except Exception as e:
