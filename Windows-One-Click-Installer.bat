@@ -54,7 +54,7 @@ curl -o "%TEMP_INSTALLER%" https://www.python.org/ftp/python/3.13.0/python-3.13.
 )
 
 echo Installing Python from temp location...
-start /wait "" "%TEMP_INSTALLER%" /quiet InstallAllUsers=0 PrependPath=1 TargetDir="%PY_DIR_APPDATA%" || (
+start /wait "" "%TEMP_INSTALLER%" /passive InstallAllUsers=1 PrependPath=1 Include_doc=0 Include_tcltk=0 Include_test=0 TargetDir="%PY_DIR_PROGRAMFILES%" || (
     echo Failed to run Python installer
     del "%TEMP_INSTALLER%" >nul 2>&1
     timeout /t 5
@@ -64,11 +64,8 @@ start /wait "" "%TEMP_INSTALLER%" /quiet InstallAllUsers=0 PrependPath=1 TargetD
 :: Clean up installer
 del "%TEMP_INSTALLER%" >nul 2>&1
 
-set PY_EXE=%PY_EXE_APPDATA%
-set PIP_EXE=%PY_DIR_APPDATA%\Scripts\pip.exe
-
-:: Update PATH
-setx PATH "%PATH%;%PY_DIR_APPDATA%;%PY_DIR_APPDATA%\Scripts" >nul 2>&1
+set PY_EXE=%PY_EXE_PROGRAMFILES%
+set PIP_EXE=%PY_DIR_PROGRAMFILES%\Scripts\pip.exe
 
 :: Verify installation
 if not exist "%PY_EXE%" (
