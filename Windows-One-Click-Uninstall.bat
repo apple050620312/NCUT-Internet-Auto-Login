@@ -59,7 +59,7 @@ if exist "%INSTALL_DIR%" (
 echo [3/3] Checking for legacy startup items...
 
 if exist %LEGACY_STARTUP% (
-    del /f /q %LEGACY_STARTUP%
+    del /f /q %LEGACY_STARTUP% >nul 2>&1
     echo    - Removed script from legacy Startup folder.
 )
 
