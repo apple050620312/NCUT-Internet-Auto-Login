@@ -48,6 +48,18 @@ Compatible with Windows 11, Ubuntu, and Android.
 6. Enjoy :)  
    享受自動登入 :)
 
+### OpenWrt / 路由器環境
+
+1. SSH into your OpenWrt router  
+   透過 SSH 進入您的 OpenWrt 路由器
+2. Run the following command:  
+   執行以下指令：
+   ```bash
+   wget -O - https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/OpenWrt-One-Click-Installer.sh | sh
+   ```
+3. Follow the prompt to enter your NCUT username and password.  
+   依照提示輸入您的勤益網路帳號與密碼。
+
 ### Linux (Debian)
 
 1. `wget 'https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/Linux-One-Click-Installer.sh'`
@@ -167,8 +179,9 @@ This script does not record user information
 
 ## Testing Environments / 測試環境
 
-* ✅ Windows 10 (24H2)
-* ✅ Ubuntu 20.04 LTS
+* ✅ Windows 10/11
+* ✅ OpenWrt 23.05 (x86_64, aarch64, mips)
+* ✅ Ubuntu 20.04/22.04 LTS
 * ✅ Termux 0.118.0 
 * ✅ 養浩學舍有線網路
 * ✅ 實驗室網路環境
