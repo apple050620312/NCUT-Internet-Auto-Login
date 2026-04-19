@@ -33,7 +33,7 @@ check_login_status() {
         return 0
     fi
     
-    if grep -qFiE "fgtauth|勤益科技大學" "$TMP_HTML" 2>/dev/null || echo "$url_eff" | grep -qFi "fgtauth"; then
+    if grep -qiE "fgtauth|勤益科技大學" "$TMP_HTML" 2>/dev/null || echo "$url_eff" | grep -qi "fgtauth"; then
         echo "NEEDS_LOGIN"
         return 0
     fi
@@ -49,7 +49,7 @@ login() {
     
     redirect_url=$(grep -oE "https?://[^'\"]+/fgtauth\?[^'\"]+" "$TMP_HTML" 2>/dev/null | head -n1)
     
-    if [ -z "$redirect_url" ] && echo "$url_eff" | grep -qFi "fgtauth"; then
+    if [ -z "$redirect_url" ] && echo "$url_eff" | grep -qi "fgtauth"; then
         redirect_url="$url_eff"
     fi
     
