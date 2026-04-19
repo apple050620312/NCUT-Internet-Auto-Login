@@ -24,7 +24,7 @@ is_system_network_connected() {
 }
 
 check_login_status() {
-    res=$(curl -s -L -w "%{http_code}|%{url_effective}" "http://www.gstatic.com/generate_204" -o "$TMP_HTML")
+    res=$(curl -s -k -L -w "%{http_code}|%{url_effective}" "http://www.gstatic.com/generate_204" -o "$TMP_HTML")
     http_code=$(echo "$res" | cut -d'|' -f1)
     url_eff=$(echo "$res" | cut -d'|' -f2)
     
@@ -44,7 +44,7 @@ check_login_status() {
 login() {
     rm -f "$COOKIE_JAR"
     
-    res=$(curl -s -L -c "$COOKIE_JAR" -w "%{http_code}|%{url_effective}" "http://www.gstatic.com/generate_204" -o "$TMP_HTML")
+    res=$(curl -s -k -L -c "$COOKIE_JAR" -w "%{http_code}|%{url_effective}" "http://www.gstatic.com/generate_204" -o "$TMP_HTML")
     url_eff=$(echo "$res" | cut -d'|' -f2)
     
     redirect_url=$(grep -oE "https?://[^'\"]+/fgtauth\?[^'\"]+" "$TMP_HTML" 2>/dev/null | head -n1)
@@ -72,17 +72,17 @@ login() {
     
     log "狀態: 正在向閘道器 $gateway_ip 發送認證請求..."
     
-    post_res=$(curl -s -b "$COOKIE_JAR" \
+    post_res=$(curl -s -k -b "$COOKIE_JAR" \
         -w "%{http_code}" \
         -H "Content-Type: application/x-www-form-urlencoded" \
         -H "Upgrade-Insecure-Requests: 1" \
         -H "Referer: $redirect_url" \
-        -H "Origin: http://$gateway_ip:1000" \
+        -H "Origin: https://$gateway_ip:1000" \
         --data-urlencode "4Tredir=http://www.gstatic.com/generate_204" \
         --data-urlencode "magic=$magic" \
         --data-urlencode "username=$ACCOUNT" \
         --data-urlencode "password=$PASSWORD" \
-        "http://$gateway_ip:1000/" -o "$TMP_HTML")
+        "https://$gateway_ip:1000/" -o "$TMP_HTML")
         
     if grep -qFi "/keepalive?" "$TMP_HTML" 2>/dev/null; then
         log "登入成功: 已成功完成校園網路認證！"
