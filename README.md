@@ -12,8 +12,6 @@ Compatible with Windows 11, Ubuntu, and Android.
 
 <p float="left">
   <img width="678" alt="圖片" src="https://github.com/user-attachments/assets/6df804e7-975a-40a5-89b5-ae537ee910bc" />
-  <br>
-  <img width="871" alt="圖片" src="https://github.com/user-attachments/assets/a291f3c6-e350-4ffb-a75d-3aee51784e08" />
 </p>
 
 
