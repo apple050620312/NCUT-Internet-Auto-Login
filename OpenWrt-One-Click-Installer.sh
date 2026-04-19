@@ -33,7 +33,7 @@ mkdir -p "$DIR"
 SCRIPT_PATH="$DIR/ncut_autologin.sh"
 
 echo "[*] 正在下載 OpenWrt 原生腳本..."
-SCRIPT_URL="https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/OpenWrt-Native-Login.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/apple050620312/NCUT-Internet-Auto-Login/refs/heads/main/OpenWrt-Native-Login.sh?t=$(date +%s)"
 curl -s -o "$SCRIPT_PATH" "$SCRIPT_URL" || {
     echo "[!] 下載腳本失敗！"
     exit 1
