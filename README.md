@@ -11,8 +11,8 @@ Compatible with Windows 11, Ubuntu, and Android.
 相容 Windows 11、Ubuntu 和 Android。
 
 <p float="left">
-  <img width="600" height="672" alt="image" src="https://github.com/user-attachments/assets/d5f3ed4e-c975-4aae-ad2b-849f705cfee5" />
-  <img width="180" height="2312" alt="Screenshot_20250902-203715_Termux" src="https://github.com/user-attachments/assets/d0b6a299-5d3d-4cc1-9cb5-13b9c1df5b8d" />
+  <img width="600" alt="image" src="https://github.com/user-attachments/assets/d5f3ed4e-c975-4aae-ad2b-849f705cfee5" />
+  <img width="180" alt="Screenshot_20250902-203715_Termux" src="https://github.com/user-attachments/assets/d0b6a299-5d3d-4cc1-9cb5-13b9c1df5b8d" />
 </p>
 
 
