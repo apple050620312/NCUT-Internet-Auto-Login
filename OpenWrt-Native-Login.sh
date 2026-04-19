@@ -70,19 +70,22 @@ login() {
         return 1
     fi
     
+    # 這是極度關鍵的一步！必須先用 GET 訪問一次跳轉網址，防火牆才會正式初始化這個 magic session！
+    curl -s -k -L -c "$COOKIE_JAR" -b "$COOKIE_JAR" "$redirect_url" -o /dev/null
+    
     log "狀態: 正在向閘道器 $gateway_ip 發送認證請求..."
     
-    post_res=$(curl -s -k -b "$COOKIE_JAR" \
+    post_res=$(curl -s -k -L -b "$COOKIE_JAR" \
         -w "%{http_code}" \
         -H "Content-Type: application/x-www-form-urlencoded" \
         -H "Upgrade-Insecure-Requests: 1" \
         -H "Referer: $redirect_url" \
-        -H "Origin: https://$gateway_ip:1000" \
+        -H "Origin: http://$gateway_ip:1000" \
         --data-urlencode "4Tredir=http://www.gstatic.com/generate_204" \
         --data-urlencode "magic=$magic" \
         --data-urlencode "username=$ACCOUNT" \
         --data-urlencode "password=$PASSWORD" \
-        "https://$gateway_ip:1000/" -o "$TMP_HTML")
+        "http://$gateway_ip:1000/" -o "$TMP_HTML")
         
     if grep -qFi "/keepalive?" "$TMP_HTML" 2>/dev/null; then
         log "登入成功: 已成功完成校園網路認證！"
