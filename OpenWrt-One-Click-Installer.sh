@@ -21,12 +21,14 @@ if ! command -v curl >/dev/null 2>&1; then
 fi
 
 echo ""
-read -p "請輸入您的帳號 (s+您的學號皆小寫): " NCUT_ACCOUNT
+echo -n "請輸入您的帳號 (s+您的學號皆小寫): "
+read NCUT_ACCOUNT < /dev/tty
 echo -n "請輸入您的密碼 (身分證字號字母大寫): "
-stty -echo
-read NCUT_PASSWORD
-stty echo
-echo -e "\n"
+stty -echo < /dev/tty
+read NCUT_PASSWORD < /dev/tty
+stty echo < /dev/tty
+echo ""
+echo ""
 
 DIR="/usr/bin/ncut-autologin"
 mkdir -p "$DIR"
@@ -40,6 +42,9 @@ curl -s -o "$SCRIPT_PATH" "$SCRIPT_URL" || {
 }
 
 chmod +x "$SCRIPT_PATH"
+
+# 修正 Windows 換行符號問題 (CRLF -> LF) 避免執行失敗
+sed -i 's/\r$//' "$SCRIPT_PATH"
 
 echo "[*] 覆寫帳號密碼設定..."
 sed -i "s/^ACCOUNT=\"YOUR_ACCOUNT\"/ACCOUNT=\"$NCUT_ACCOUNT\"/" "$SCRIPT_PATH"
@@ -56,7 +61,7 @@ PROG=/usr/bin/ncut-autologin/ncut_autologin.sh
 
 start_service() {
     procd_open_instance
-    procd_set_param command "$PROG"
+    procd_set_param command /bin/sh "$PROG"
     procd_set_param respawn
     procd_set_param stdout 1
     procd_set_param stderr 1
