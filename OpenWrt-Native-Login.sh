@@ -14,7 +14,9 @@ log() {
 }
 
 is_system_network_connected() {
-    if ping -c 1 -W 2 8.8.8.8 >/dev/null 2>&1; then
+    # 僅查詢本地路由表確認是否具備預設閘道 (確認實體連線有取得 IP)
+    # 絕對不可使用 ping，因為未登入認證前，防火牆會直接阻擋向外的 ICMP 封包導致誤判。
+    if route -n 2>/dev/null | grep -q "^0\.0\.0\.0" || ip route 2>/dev/null | grep -q "^default"; then
         return 0
     else
         return 1
