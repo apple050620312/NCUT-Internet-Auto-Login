@@ -24,9 +24,7 @@ echo ""
 echo -n "請輸入您的帳號 (s+您的學號皆小寫): "
 read NCUT_ACCOUNT < /dev/tty
 echo -n "請輸入您的密碼 (身分證字號字母大寫): "
-stty -echo < /dev/tty
 read NCUT_PASSWORD < /dev/tty
-stty echo < /dev/tty
 echo ""
 echo ""
 
