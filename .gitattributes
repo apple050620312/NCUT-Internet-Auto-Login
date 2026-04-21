@@ -1,3 +1,3 @@
-*.command text eol=lf #for macOS/Linux
+*.command text eol=lf #for MacOS
 *.bat text eol=crlf #for Windows
 *.py text #for all platforms
