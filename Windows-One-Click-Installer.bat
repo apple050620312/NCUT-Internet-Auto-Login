@@ -97,29 +97,30 @@ if exist "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Inter
     del "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py"
 )
 
-:: Step 4: Create Scheduled Task (Unattended Mode)
-echo Creating system startup task...
-
-:: /sc onstart = Runs when Windows boots (before login)
-:: /ru SYSTEM = Runs with System privileges
-:: /tn "NCUT Auto Login" = Task Name
+:: Step 4: Create Scheduled Task (Unattended Mode + Auto Restart Protection)
+echo Creating system startup task and applying protection policies...
 schtasks /create /tn "NCUT Auto Login" /tr "\"%PY_EXE%\" \"%SCRIPT_PATH%\"" /sc onstart /ru SYSTEM /rl HIGHEST /f >nul 2>&1
+set "TASK_XML=%TEMP%\ncut_task.xml"
+schtasks /query /tn "NCUT Auto Login" /xml > "%TASK_XML%"
+
+powershell -NoProfile -Command "(Get-Content '%TASK_XML%') -replace '<ExecutionTimeLimit>.*</ExecutionTimeLimit>', '<ExecutionTimeLimit>PT0S</ExecutionTimeLimit>' -replace '</Settings>', '<RestartOnFailure><Interval>PT1M</Interval><Count>999</Count></RestartOnFailure></Settings>' | Set-Content '%TASK_XML%'"
+schtasks /create /tn "NCUT Auto Login" /xml "%TASK_XML%" /ru SYSTEM /f >nul 2>&1
+del "%TASK_XML%" >nul 2>&1
 
 :: Step 5: Start the script immediately (so you don't have to reboot now)
 echo Starting login service immediately...
 start "" "%PY_EXE%" "%SCRIPT_PATH%"
 
-echo #######################################################
-echo # INSTALLATION COMPLETED SUCCESSFULLY!                #
-echo #                                                     #
-echo # Python Script Location:                             #
+echo ################################################################
+echo # INSTALLATION COMPLETED SUCCESSFULLY!                         #
+echo #                                                              #
+echo # Python Script Location:                                      #
 echo # %SCRIPT_PATH%
-echo #                                                     #
-echo # Status:                                             #
-echo # - Unattended Mode: ACTIVE (/sc onstart)             #
-echo # - Runs automatically at BOOT (No login needed)      #
-echo # - Runs with SYSTEM privileges                       #
-echo #######################################################
+echo #                                                              #
+echo # Status:                                                      #
+echo # - Unattended Mode: ACTIVE (/sc onstart)                      #
+echo # - Runs automatically at BOOT (No login needed)               #
+echo # - Runs with SYSTEM privileges                                #
+echo ################################################################
 
-timeout /t 5
-exit /b 0
+pause

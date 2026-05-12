@@ -1,78 +1,64 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: =======================================================
-:: Check for Administrator Privileges
-:: =======================================================
+:: Check for administrator privileges
 NET SESSION >nul 2>&1
 if %errorlevel% neq 0 (
     echo #######################################################
-    echo # ERROR: PLEASE RUN THIS SCRIPT AS ADMINISTRATOR!     #
+    echo # PLEASE RUN THIS SCRIPT AS ADMINISTRATOR!            #
     echo # Right-click -> Run as Administrator                 #
     echo #######################################################
     timeout /t 5
     exit /b 1
 )
 
-:: =======================================================
-:: Configuration
-:: =======================================================
-set TASK_NAME="NCUT Auto Login"
-set INSTALL_DIR=%ProgramData%\NCUT_AutoLogin
-set LEGACY_STARTUP="%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py"
+echo =========================================
+echo   NCUT Auto Login - Uninstaller
+echo =========================================
+echo.
 
-echo =======================================================
-echo     Uninstalling NCUT Auto Login Script...
-echo =======================================================
-
-:: =======================================================
-:: Step 1: Remove Scheduled Task
-:: =======================================================
-echo [1/3] Removing system scheduled task...
-
-:: Attempt to stop the task if it is running
-schtasks /end /tn %TASK_NAME% >nul 2>&1
-
-:: Delete the task
-schtasks /delete /tn %TASK_NAME% /f >nul 2>&1
+:: 1. 停止並刪除工作排程器任務
+echo [1/4] Removing Scheduled Task...
+schtasks /delete /tn "NCUT Auto Login" /f >nul 2>&1
 if %errorlevel% equ 0 (
-    echo    - Scheduled task deleted successfully.
+    echo   - Task "NCUT Auto Login" removed successfully.
 ) else (
-    echo    - Scheduled task not found or already deleted.
+    echo   - Task not found or already removed.
 )
 
-:: =======================================================
-:: Step 2: Remove Files and Directory
-:: =======================================================
-echo [2/3] Removing script files...
+:: 2. 強制終止正在背景執行的 Python 登入腳本
+echo [2/4] Stopping background processes...
+wmic process where "name='python.exe' and commandline like '%%NCUT_Internet_Auto_Login.py%%'" call terminate >nul 2>&1
+
+:: 3. 刪除新版安裝目錄與腳本
+echo [3/4] Removing script files...
+set INSTALL_DIR=%ProgramData%\NCUT_AutoLogin
+set SCRIPT_PATH=%INSTALL_DIR%\NCUT_Internet_Auto_Login.py
+
+if exist "%SCRIPT_PATH%" (
+    del "%SCRIPT_PATH%" /f /q
+    echo   - Deleted: %SCRIPT_PATH%
+)
 
 if exist "%INSTALL_DIR%" (
-    rmdir /s /q "%INSTALL_DIR%"
-    echo    - Removed installation directory: %INSTALL_DIR%
-) else (
-    echo    - Installation directory not found, skipping.
+    rmdir "%INSTALL_DIR%" /s /q >nul 2>&1
+    echo   - Removed directory: %INSTALL_DIR%
 )
 
-:: =======================================================
-:: Step 3: Cleanup Legacy Startup Items
-:: =======================================================
-echo [3/3] Checking for legacy startup items...
-
-if exist %LEGACY_STARTUP% (
-    del /f /q %LEGACY_STARTUP% >nul 2>&1
-    echo    - Removed script from legacy Startup folder.
+:: 4. 清理舊版本 (Startup 資料夾) 的殘留檔案
+echo [4/4] Checking for legacy files...
+set OLD_SCRIPT="%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Internet_Auto_Login.py"
+if exist %OLD_SCRIPT% (
+    del %OLD_SCRIPT% /f /q
+    echo   - Legacy script removed from Startup.
+) else (
+    echo   - No legacy files found.
 )
 
 echo.
 echo #######################################################
-echo #  UNINSTALLATION COMPLETED!                          #
-echo #                                                     #
-echo #  - Auto-login task cancelled                        #
-echo #  - Script files removed                             #
-echo #                                                     #
-echo #  NOTE: Python remains installed on your system.     #
-echo #  (To avoid affecting other Python applications)     #
+echo # UNINSTALLATION COMPLETED SUCCESSFULLY!              #
+echo # All files and background tasks have been removed.   #
 echo #######################################################
-
-timeout /t 5
-exit /b 0
+echo.
+pause
