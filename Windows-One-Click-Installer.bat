@@ -29,18 +29,33 @@ set SCRIPT_PATH=%INSTALL_DIR%\NCUT_Internet_Auto_Login.py
 set TEMP_INSTALLER=%TEMP%\python_installer.exe
 
 :: Step 1: Check for existing Python installations
-echo Checking Python %PY_VER% installation...
+echo Checking for existing Python installations...
 set PY_EXE=
+
+:: First, try to see if Python is available in PATH and usable by SYSTEM (exclude Windows Store apps)
+for /f "delims=" %%I in ('python -c "import sys; print(sys.executable)" 2^>nul') do set "PY_EXE_SYS=%%I"
+if defined PY_EXE_SYS (
+    echo "%PY_EXE_SYS%" | findstr /i "WindowsApps" >nul
+    if errorlevel 1 (
+        if exist "%PY_EXE_SYS%" (
+            set PY_EXE=%PY_EXE_SYS%
+            echo Found Python in system PATH: !PY_EXE!
+            goto python_installed
+        )
+    ) else (
+        echo Found Python in WindowsApps ^(Store version^), which is not suitable for SYSTEM tasks.
+    )
+)
+
+:: If not in PATH, check default paths for Python 3.13
 if exist "%PY_EXE_PROGRAMFILES%" (
     set PY_EXE=%PY_EXE_PROGRAMFILES%
-    set PIP_EXE=%PY_DIR_PROGRAMFILES%\Scripts\pip.exe
     echo Found Python %PY_VER% in Program Files.
     goto python_installed
 )
 
 if exist "%PY_EXE_APPDATA%" (
     set PY_EXE=%PY_EXE_APPDATA%
-    set PIP_EXE=%PY_DIR_APPDATA%\Scripts\pip.exe
     echo Found Python %PY_VER% in AppData.
     goto python_installed
 )
@@ -100,12 +115,19 @@ if exist "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NCUT_Inter
 :: Step 4: Create Scheduled Task (Unattended Mode + Auto Restart Protection)
 echo Creating system startup task and applying protection policies...
 schtasks /create /tn "NCUT Auto Login" /tr "\"%PY_EXE%\" \"%SCRIPT_PATH%\"" /sc onstart /ru SYSTEM /rl HIGHEST /f >nul 2>&1
-set "TASK_XML=%TEMP%\ncut_task.xml"
-schtasks /query /tn "NCUT Auto Login" /xml > "%TASK_XML%"
+if %errorlevel% neq 0 (
+    echo Error: Failed to create the scheduled task.
+    timeout /t 5
+    exit /b 1
+)
 
-powershell -NoProfile -Command "(Get-Content '%TASK_XML%') -replace '<ExecutionTimeLimit>.*</ExecutionTimeLimit>', '<ExecutionTimeLimit>PT0S</ExecutionTimeLimit>' -replace '</Settings>', '<RestartOnFailure><Interval>PT1M</Interval><Count>999</Count></RestartOnFailure></Settings>' | Set-Content '%TASK_XML%'"
-schtasks /create /tn "NCUT Auto Login" /xml "%TASK_XML%" /ru SYSTEM /f >nul 2>&1
-del "%TASK_XML%" >nul 2>&1
+set "TASK_XML=%TEMP%\ncut_task.xml"
+:: Export XML and use PowerShell to properly handle encoding (UTF-16) and manipulate the XML string
+powershell -NoProfile -Command "$xml = schtasks /query /tn 'NCUT Auto Login' /xml; if ($xml) { $xml = $xml -replace '<ExecutionTimeLimit>.*</ExecutionTimeLimit>', '<ExecutionTimeLimit>PT0S</ExecutionTimeLimit>' -replace '</Settings>', '<RestartOnFailure><Interval>PT1M</Interval><Count>999</Count></RestartOnFailure></Settings>'; [System.IO.File]::WriteAllText('%TASK_XML%', $xml, [System.Text.Encoding]::Unicode) }"
+if exist "%TASK_XML%" (
+    schtasks /create /tn "NCUT Auto Login" /xml "%TASK_XML%" /ru SYSTEM /f >nul 2>&1
+    del "%TASK_XML%" >nul 2>&1
+)
 
 :: Step 5: Start the script immediately (so you don't have to reboot now)
 echo Starting login service immediately...
