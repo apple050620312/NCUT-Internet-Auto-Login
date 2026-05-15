@@ -77,17 +77,14 @@ Compatible with Windows 11, Ubuntu, and Android.
 1. Install [Python](https://www.python.org/downloads/)  
 
    安裝 [Python](https://www.python.org/downloads/)
-   
-2. Press `Win + R` type `cmd` press `Enter` 
-   按 `Win + R` 輸入 `cmd` 按 `Enter`
 
-3. Download `NCUT_Internet_Auto_Login.py` file  
+2. Download `NCUT_Internet_Auto_Login.py` file  
    下載 `NCUT_Internet_Auto_Login.py` 這個檔案
 
-4. Double-click to run the script  
+3. Double-click to run the script  
    點兩下開啟腳本
 
-5. Follow the prompt in the console to enter your network account details.  
+4. Follow the prompt in the console to enter your network account details.  
    依據終端機視窗的提示輸入網路帳號與密碼。
 
 ### Linux (Debian)
