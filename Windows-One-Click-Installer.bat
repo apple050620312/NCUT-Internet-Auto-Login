@@ -123,7 +123,7 @@ if %errorlevel% neq 0 (
 
 set "TASK_XML=%TEMP%\ncut_task.xml"
 :: Export XML and use PowerShell to properly handle encoding (UTF-16) and manipulate the XML string
-powershell -NoProfile -Command "$xml = schtasks /query /tn 'NCUT Auto Login' /xml; if ($xml) { $xml = $xml -replace '<ExecutionTimeLimit>.*</ExecutionTimeLimit>', '<ExecutionTimeLimit>PT0S</ExecutionTimeLimit>' -replace '</Settings>', '<RestartOnFailure><Interval>PT1M</Interval><Count>999</Count></RestartOnFailure></Settings>'; [System.IO.File]::WriteAllText('%TASK_XML%', $xml, [System.Text.Encoding]::Unicode) }"
+powershell -NoProfile -Command "$xml = (schtasks /query /tn 'NCUT Auto Login' /xml) -join [Environment]::NewLine; if ($xml) { $xml = $xml -replace '<ExecutionTimeLimit>.*?</ExecutionTimeLimit>', ''; $xml = $xml -replace '</Settings>', '<ExecutionTimeLimit>PT0S</ExecutionTimeLimit><RestartOnFailure><Interval>PT1M</Interval><Count>999</Count></RestartOnFailure></Settings>'; [System.IO.File]::WriteAllText('%TASK_XML%', $xml, [System.Text.Encoding]::Unicode) }"
 if exist "%TASK_XML%" (
     schtasks /create /tn "NCUT Auto Login" /xml "%TASK_XML%" /ru SYSTEM /f >nul 2>&1
     del "%TASK_XML%" >nul 2>&1
