@@ -101,7 +101,7 @@ EOF
 )
 if [ "$MODE" = "取消" ] || [ -z "$MODE" ]; then exit 0; fi
 
-# 4. 寫入 Python 主程式
+# 4. 寫入 Python 主程式並設定正確的檔案權限
 cat << 'EOF' > "$PYTHON_FILE"
 # ==============================================================================
 # 👇 NCUT_Internet_Auto_Login.py Python 程式碼👇
@@ -435,8 +435,12 @@ if __name__ == "__main__":
 EOF
 
 # 5. 將使用者輸入的帳號密碼自動替換進 Python 腳本中
-sed -i '' "s/account *= *\".*\"/account = \"$ACCOUNT\"/g" "$PYTHON_FILE"
-sed -i '' "s/password *= *\".*\"/password = \"$PASSWORD\"/g" "$PYTHON_FILE"
+# 使用更精確的正則表達式，匹配 account = "..." 格式（等號兩側可能有空格）
+sed -i '' 's/^account = ".*"/account = "'"$ACCOUNT"'"/' "$PYTHON_FILE"
+sed -i '' 's/^password = ".*"/password = "'"$PASSWORD"'"/' "$PYTHON_FILE"
+
+# 設定正確的檔案權限，確保腳本可讀可寫
+chmod 644 "$PYTHON_FILE"
 
 # 6. 執行切換前的大掃除 
 launchctl unload "$PLIST_FILE" 2>/dev/null
@@ -460,6 +464,8 @@ if [ "$MODE" = "隱藏背景執行" ]; then
         <string>/usr/bin/python3</string>
         <string>$PYTHON_FILE</string>
     </array>
+    <key>WorkingDirectory</key>
+    <string>$INSTALL_DIR</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>

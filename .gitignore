@@ -1,1 +1,8 @@
 OpenWrtMwan3/
+
+# Windows Installer build outputs
+Windows-Installer/Output/
+Windows-Installer/files/
+Windows-Installer/logs/
+Windows-Installer/*.tmp
+Windows-Installer/config.ini
