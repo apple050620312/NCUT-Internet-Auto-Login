@@ -1,6 +1,6 @@
 # ==============================================================================
 # NCUT 校園網自動登入服務啟動器 (Windows Service 版本)
-# 使用 pythonw.exe 運行，不顯示Console視窗
+# 支援 Python 直譯器 與 PyInstaller 打包的 exe
 # ==============================================================================
 
 import time
@@ -16,6 +16,15 @@ from urllib.parse import quote
 from datetime import datetime
 
 # ==============================================================================
+# PyInstaller 相容性：取得應用程式所在目錄（而非暫存解壓目錄）
+# ==============================================================================
+if getattr(sys, 'frozen', False):
+    APP_DIR = os.path.dirname(sys.executable)
+else:
+    APP_DIR = os.path.dirname(os.path.abspath(__file__))
+# ==============================================================================
+
+# ==============================================================================
 # 【帳號密碼設定區】
 # ==============================================================================
 account = "請替換為您的帳號並儲存（s+ 您的學號皆小寫）"
@@ -25,7 +34,7 @@ password = "請替換為您的密碼並儲存（身分證字號字母大寫）"
 # 設定日誌記錄
 def setup_logging():
     """設定服務日誌記錄"""
-    log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+    log_dir = os.path.join(APP_DIR, 'logs')
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
@@ -225,7 +234,7 @@ def main():
         logger.error("請在安裝時輸入帳號密碼，或手動修改此檔案。")
 
         # 嘗試從安裝配置文件讀取
-        config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.ini')
+        config_file = os.path.join(APP_DIR, 'config.ini')
         if os.path.exists(config_file):
             try:
                 with open(config_file, 'r', encoding='utf-8') as f:

@@ -3,8 +3,8 @@
     <id>NCUTAutoLogin</id>
     <name>NCUT 校園網自動登入服務</name>
     <description>自動檢測網路狀態並登入 NCUT 校園網路認證系統</description>
-    <executable>%BASEDIR%\Python\pythonw.exe</executable>
-    <arguments>%BASEDIR%\Scripts\ncut_login.py</arguments>
+    <executable>%BASEDIR%\NCUTAutoLogin.exe</executable>
+    <arguments></arguments>
     <logmode>roll</logmode>
     <logpath>%BASEDIR%\logs</logpath>
     <logtitle>NCUT Auto Login</logtitle>

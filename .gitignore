@@ -2,7 +2,11 @@ OpenWrtMwan3/
 
 # Windows Installer build outputs
 Windows-Installer/Output/
-Windows-Installer/files/
+Windows-Installer/files/winsw.exe
 Windows-Installer/logs/
 Windows-Installer/*.tmp
 Windows-Installer/config.ini
+
+# PyInstaller artifacts
+Windows-Installer/build/
+Windows-Installer/NCUTAutoLogin.spec
