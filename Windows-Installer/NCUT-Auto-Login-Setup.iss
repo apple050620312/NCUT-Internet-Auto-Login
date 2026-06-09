@@ -212,15 +212,16 @@ procedure UninstallService;
 var
   ResultCode: Integer;
 begin
-  if Exec(ExpandConstant('{app}\winsw.exe'), 'stop', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
-  begin
-    Log('Service stopped');
-  end;
+  // 1. 正常要求服務停止與移除
+  Exec(ExpandConstant('{app}\winsw.exe'), 'stop', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec(ExpandConstant('{app}\winsw.exe'), 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 
-  if Exec(ExpandConstant('{app}\winsw.exe'), 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
-  begin
-    Log('Service uninstalled');
-  end;
+  // 2. 暴力終止殘留的處理程序，徹底解除檔案鎖定 (關鍵！)
+  Exec('cmd.exe', '/c taskkill /F /IM winsw.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('cmd.exe', '/c taskkill /F /IM NCUTAutoLogin.exe /T', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+
+  // 3. 稍等 1 秒讓 Windows 系統徹底釋放檔案資源
+  Sleep(1000);
 end;
 
 function InitializeSetup(): Boolean;
@@ -284,5 +285,9 @@ Type: files; Name: "{app}\NCUTAutoLogin.exe"
 Type: files; Name: "{app}\logs\*.*"
 
 [UninstallDelete]
-Type: files; Name: "{app}\logs\*.*"
+Type: files; Name: "{app}\config.ini"
+Type: files; Name: "{app}\winsw.xml"
+Type: files; Name: "{app}\winsw.exe"
+Type: files; Name: "{app}\NCUTAutoLogin.exe"
 Type: filesandordirs; Name: "{app}\logs"
+Type: dirifempty; Name: "{app}"
